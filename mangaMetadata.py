@@ -32,6 +32,10 @@ try:
 except:
     ENV_MANGAS = "NONE"
 try:
+    ENV_LIBS = os.environ['LIBS']
+except:
+    ENV_LIBS = "NONE"
+try:
     ENV_PROGRESS = os.environ['KEEPPROGRESS']
     if(ENV_PROGRESS.lower() == "true"):
         ENV_PROGRESS = True
@@ -59,6 +63,12 @@ elif (ENV_URL != "" and ENV_EMAIL != "" and ENV_PASS != "" and ENV_LANG != ""):
             if(manga[:1] == " "):
                 manga = manga[1:]
             mangas.append(manga)
+    libraries = []
+    if(ENV_LIBS != "NONE"):
+        for lib in ENV_LIBS.split(","):
+            if(lib[:1] == " "):
+                lib = lib[1:]
+            libraries.append(lib)
 else:
     print("Looks like either you are trying to set the configuration using environment variables or you are using docker.")
     if(ENV_URL == ""):
@@ -194,6 +204,7 @@ def getMangaMetadata(query):
     #getLangIndex
     index = 1
     rightIndex = -1
+    forcedIndex = "1"
     langRunning = True
     while(langRunning):
         try:
@@ -224,7 +235,7 @@ def getMangaMetadata(query):
 
     #getStatus
     try:
-        status = html_dom.xpath("//*[@id=\"information\"]/div/ul/li[2]/ul/li[" + rightIndex + "]/div[" + str(statusIndex) + "]")[0].itertext()
+        status = html_dom.xpath("//*[@id=\"information\"]/div/ul/li[2]/ul/li[" + forcedIndex + "]/div[@class=\"status\"]")[0].itertext()
         status = ''.join(status).split(": ")[1]
     except Exception as e:
         try:
@@ -247,6 +258,20 @@ def getMangaMetadata(query):
             
         data.status = casestatus
 
+    #getTotalBookCount
+    try:
+        totalBookCount = html_dom.xpath("//*[@id=\"information\"]/div/ul/li[2]/ul/li[" + forcedIndex + "]/div[@class=\"releases\"]")[0].itertext()
+        totalBookCount = ''.join(totalBookCount).split(": ")[1].split(" / ")[0].replace("+", "")
+        # print("------ totalBookCount : "+totalBookCount)
+    except Exception as e:
+        try:
+            totalBookCount = html_dom.xpath("//*[@id=\"information\"]/div/ul/li[2]/ul/li[1]/div[@class=\"releases\"]")[0].itertext()
+            totalBookCount = ''.join(totalBookCount).split(": ")[1].split(" / ")[0].replace("+", "")
+        except Exception as e:
+            print(e)
+            print("Failed to get totalBookCount")
+
+    data.totalBookCount = totalBookCount
 
     #getSummary
     try:
@@ -309,12 +334,12 @@ def getMangaMetadata(query):
                 summary = summary[:len(summary) - l]
                 break
 
-        data.summary = summary
+        data.summary = summary.replace("\"", "“")
 
 
     #getPublisher
     try:
-        publisher = html_dom.xpath("//*[@id=\"information\"]/div/ul/li[2]/ul/li[" + rightIndex + "]/div[" + str(publisherIndex) + "]")[0].itertext()
+        publisher = html_dom.xpath("//*[@id=\"information\"]/div/ul/li[2]/ul/li[" + rightIndex + "]/[@class=\"company\"]")[0].itertext()
         publisher = ''.join(publisher)
     except Exception as e:
         try:
@@ -382,6 +407,10 @@ page.goto(getBaseURL())
 
 print("Using user " + komgaemail)
 
+
+libreq = requests.get(komgaurl + '/api/v1/libraries', auth = (komgaemail, komgapassword))
+json_lib = json.loads(libreq.text)
+
 x = requests.get(komgaurl + '/api/v1/series?size=50000', auth = (komgaemail, komgapassword))
 
 json_string = json.loads(x.text)
@@ -429,8 +458,19 @@ for series in json_string['content']:
         if(series['name'] not in mangas):
             continue
     print("Number: " + str(seriesnum) + "/" + str(expected))
-    name = series['name']
+    name = series['metadata']['title']
     seriesID = series['id']
+
+    if(len(libraries) > 0):
+        libraryId = series['libraryId']
+        currentLib = ""
+        for libKom in json_lib:
+            if libKom['id'] == libraryId:
+                currentLib = libKom['name']
+        if(currentLib not in libraries):
+            print("------------ ignoring "+str(name)+" not in right lib ----------------")
+            continue
+    
     if(str(seriesID) in progresslist):
         print("Manga " + str(name) + " was already updated, skipping...")
         continue
@@ -447,6 +487,8 @@ for series in json_string['content']:
         time.sleep(10)
         continue
     jsondata = """{
+  "language": "fr",
+  "languageLock": true,
   "status": %s,
   "statusLock": true,
   "summary": "%s",
@@ -456,11 +498,13 @@ for series in json_string['content']:
   "genres": %s,
   "genresLock": true,
   "tags": %s,
-  "tagsLock": true
-}""" % (md.status, md.summary.replace('\n', '\\n'), md.publisher, md.genres, md.tags)
+  "tagsLock": true,
+  "totalBookCount": %s,
+  "totalBookCountLock": true
+}""" % (md.status, md.summary.replace('\n', '\\n'), md.publisher, md.genres, md.tags, md.totalBookCount)
 #% (md.status, md.summary.encode('ascii', 'ignore').decode("utf-8").replace('\n', '\\n'), md.publisher, md.genres, md.tags)
-    pushdata = jsondata.replace("\n", "").replace("{  \\\"status\\\": ", "{\\\"status\\\":").replace(",  \\\"statusLock\\\": ", ",\\\"statusLock\\\":").replace(",  \\\"summary\\\": ", ",\\\"summary\\\":").replace(",  \\\"summaryLock\\\": ", ",\\\"summaryLock\\\":").replace("\n", "").replace("\r", "")
-    print(pushdata)
+    pushdata = jsondata.replace("\n", "").replace("{  \\\"status\\\": ", "{\\\"status\\\":").replace("{  \\\"languageLock\\\": ", "{\\\"languageLock\\\":").replace("{  \\\"language\\\": ", "{\\\"language\\\":").replace("{  \\\"totalBookCount\\\": ", "{\\\"totalBookCount\\\":").replace("{  \\\"totalBookCountLock\\\": ", "{\\\"totalBookCountLock\\\":").replace(",  \\\"statusLock\\\": ", ",\\\"statusLock\\\":").replace(",  \\\"summary\\\": ", ",\\\"summary\\\":").replace(",  \\\"summaryLock\\\": ", ",\\\"summaryLock\\\":").replace("\n", "").replace("\r", "")
+    # print(pushdata)
     headers = {'Content-Type': 'application/json', 'accept': '*/*'}
     patch = requests.patch(komgaurl + "/api/v1/series/" + seriesID + "/metadata", data=str.encode(pushdata), auth = (komgaemail, komgapassword), headers=headers)
     if(patch.status_code == 204):
@@ -471,6 +515,7 @@ for series in json_string['content']:
         time.sleep(10)
     else:
         try:
+            print(pushdata)
             print("----------------------------------------------------")
             print("Failed to update " + str(name) + ", trying again at the end")
             print("----------------------------------------------------")

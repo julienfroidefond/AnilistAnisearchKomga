@@ -1,5 +1,17 @@
 # Anisearch metadata scraper for Komga
 
+## About this fork
+
+I have updated and done some private work :
+
+- Get Total number of books (always japanese)
+- Adding LIBS env; format like MANGAS for only some libs
+- Force status with japanese status
+- removing some bad caracters on summary
+- instead of getting the basic name for search;, getting the metadata title
+- setting always language to fr
+- print push data only if fails
+
 ## Introduction
 This Script gets a list of every manga available on your Komga instance,
 looks it up one after another on [Anisearch](https://www.anisearch.com/) and gets the metadata for the specific series.
