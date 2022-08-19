@@ -11,6 +11,8 @@ I have updated and done some private work :
 - instead of getting the basic name for search;, getting the metadata title
 - setting always language to fr
 - print push data only if fails
+- not resynchronizing if status is ended and status lock (we consider that if status lock; it has been by the synchronizer). If you want to resync; you just have to remove lock state on status in the UI.
+- info in print has been reviewed : colors and typings :)
 
 ## Introduction
 This Script gets a list of every manga available on your Komga instance,
