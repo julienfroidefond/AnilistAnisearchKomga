@@ -28,6 +28,8 @@ def printC(msg, type = 'info'):
         print(bcolors.OKGREEN+"[SUCCESS] : "+msg+bcolors.ENDC)
     elif(type=="debug"):
         print(bcolors.WARNING+"[DEBUG] : "+msg+bcolors.ENDC)
+    elif(type=="warn"):
+        print(bcolors.WARNING+"[WARN] : "+msg+bcolors.ENDC)
     else:
         print(bcolors.OKBLUE+"[INFO] : "+msg+bcolors.ENDC)
 
@@ -149,8 +151,8 @@ class metadata:
             self.summary = ""
             self.publisher = ""
 #            self.agerating = ""
-            self.genres = "[]"
-            self.tags = "[]"
+            self.genres = []
+            self.tags = []
             self.isvalid = False
 
 def getURLfromSearch(query):
@@ -195,8 +197,8 @@ def getMangaMetadata(query):
     summary = ""        #done
     publisher = ""      #done
 #    agerating = ""
-    genres = "[]"
-    tags = "[]"
+    genres = []
+    tags = []
 
     data = metadata()
 
@@ -267,13 +269,13 @@ def getMangaMetadata(query):
 
     if(status != ""):
         if(status in runningLang):
-            casestatus = "\"ONGOING\""
+            casestatus = "ONGOING"
         elif(status in abandonedLang):
-            casestatus = "\"ABANDONED\""
+            casestatus = "ABANDONED"
         elif(status in endedLang):
-            casestatus = "\"ENDED\""
+            casestatus = "ENDED"
         else:
-            casestatus = "\"ENDED\""
+            casestatus = "ENDED"
                 
             
         data.status = casestatus
@@ -396,24 +398,10 @@ def getMangaMetadata(query):
             running = False
 
     if(len(genrelist) > 0):
-        genres = "["
-        for idx, genre in enumerate(genrelist):
-            if(idx != 0):
-                genres += ",\n"
-            genres += "\"" + genre + "\""
-        genres += "]"
-
-        data.genres = genres
+        data.genres = genrelist
 
     if(len(taglist) > 0):
-        tags = "["
-        for idx, tag in enumerate(taglist):
-            if(idx != 0):
-                tags += ",\n"
-            tags += "\"" + tag + "\""
-        tags += "]"
-
-        data.tags = tags
+        data.tags = taglist
 
     data.isvalid = True
     return data
@@ -478,7 +466,7 @@ for series in json_string['content']:
         isFinished = True
     name = series['metadata']['title']
     if (isFinished == True):
-        printC("Ignoring "+str(name)+" : series terminated and already synchronized")
+        printC("Ignoring "+str(name)+" : series terminated and already synchronized", 'warn')
         continue
     if(len(mangas) > 0):
         if(series['name'] not in mangas):
@@ -493,7 +481,7 @@ for series in json_string['content']:
             if libKom['id'] == libraryId:
                 currentLib = libKom['name']
         if(currentLib not in libraries):
-            printC("ignoring "+str(name)+" not in right lib")
+            printC("ignoring "+str(name)+" not in right lib", 'warn')
             continue
     
     if(str(seriesID) in progresslist):
@@ -511,25 +499,23 @@ for series in json_string['content']:
         failedfile.write(name)
         time.sleep(10)
         continue
-    jsondata = """{
-  "language": "fr",
-  "languageLock": true,
-  "status": %s,
-  "statusLock": true,
-  "summary": "%s",
-  "summaryLock": true,
-  "publisher": "%s",
-  "publisherLock": true,
-  "genres": %s,
-  "genresLock": true,
-  "tags": %s,
-  "tagsLock": true,
-  "totalBookCount": %s,
-  "totalBookCountLock": true
-}""" % (md.status, md.summary.replace('\n', '\\n'), md.publisher, md.genres, md.tags, md.totalBookCount)
-#% (md.status, md.summary.encode('ascii', 'ignore').decode("utf-8").replace('\n', '\\n'), md.publisher, md.genres, md.tags)
-    pushdata = jsondata.replace("\n", "").replace("{  \\\"status\\\": ", "{\\\"status\\\":").replace("{  \\\"languageLock\\\": ", "{\\\"languageLock\\\":").replace("{  \\\"language\\\": ", "{\\\"language\\\":").replace("{  \\\"totalBookCount\\\": ", "{\\\"totalBookCount\\\":").replace("{  \\\"totalBookCountLock\\\": ", "{\\\"totalBookCountLock\\\":").replace(",  \\\"statusLock\\\": ", ",\\\"statusLock\\\":").replace(",  \\\"summary\\\": ", ",\\\"summary\\\":").replace(",  \\\"summaryLock\\\": ", ",\\\"summaryLock\\\":").replace("\n", "").replace("\r", "")
-    # printC(pushdata)
+    jsonToPush = {
+        "language": "fr",
+        "languageLock": True,
+        "status": md.status,
+        "statusLock": True,
+        "summary": md.summary,
+        "summaryLock": True,
+        "publisher": md.publisher,
+        "publisherLock": True,
+        "genres": md.genres,
+        "genresLock": True,
+        "tags": md.tags,
+        "tagsLock": True,
+        "totalBookCount": md.totalBookCount,
+        "totalBookCountLock": True
+    }
+    pushdata = json.dumps(jsonToPush, ensure_ascii=False).replace("\n", "").replace("\r", "")
     headers = {'Content-Type': 'application/json', 'accept': '*/*'}
     patch = requests.patch(komgaurl + "/api/v1/series/" + seriesID + "/metadata", data=str.encode(pushdata), auth = (komgaemail, komgapassword), headers=headers)
     if(patch.status_code == 204):
@@ -540,13 +526,12 @@ for series in json_string['content']:
         time.sleep(10)
     else:
         try:
-            printC("[DEBUG] :")
-            printC(pushdata)
             printC("----------------------------------------------------")
-            printC("Failed to update " + str(name) + ", trying again at the end", 'error')
+            printC(pushdata, "debug")
+            printC("Failed to update " + str(name), 'error')
+            printC(patch, 'error')
+            printC(patch.text, 'error')
             printC("----------------------------------------------------")
-            printC(patch)
-            printC(patch.text)
             failedfile.write(str(seriesID))
             failedfile.write(name)
             fail = failedtries(seriesID, name)
@@ -556,40 +541,40 @@ for series in json_string['content']:
 
 failedfile.close()
 
-for f in failed:
-    md = getMangaMetadata(f.name)
-    if (md.isvalid == False):
-        printC("----------------------------------------------------")
-        printC("Failed again to update " + str(f.name) + ", not trying again")
-        printC("----------------------------------------------------")
-        time.sleep(10)
-        continue
-    jsondata = """{
-      "status": %s,
-      "statusLock": true,
-      "summary": "%s",
-      "summaryLock": true,
-      "publisher": "%s",
-      "publisherLock": true,
-      "genres": %s,
-      "genresLock": true,
-      "tags": %s,
-      "tagsLock": true
-    }""" % (md.status, md.summary.replace('\n', '\\n'), md.publisher, md.genres, md.tags)
-    pushdata = jsondata.replace("\n", "").replace("{  \\\"status\\\": ", "{\\\"status\\\":").replace(",  \\\"statusLock\\\": ", ",\\\"statusLock\\\":").replace(",  \\\"summary\\\": ", ",\\\"summary\\\":").replace(",  \\\"summaryLock\\\": ", ",\\\"summaryLock\\\":").replace("\n", "").replace("\r", "")
-    printC(pushdata)
-    headers = {'Content-Type': 'application/json', 'accept': '*/*'}
-    patch = requests.patch(komgaurl + "/api/v1/series/" + seriesID + "/metadata", data=str.encode(pushdata), auth = (komgaemail, komgapassword), headers=headers)
-    if(patch.status_code == 204):
-        printC("++++++++++++++++++++++++++++++++++++++++++++++++++++")
-        printC("Successfully updated " + str(f.name), 'success')
-        printC("++++++++++++++++++++++++++++++++++++++++++++++++++++")
-        addMangaProgress(seriesID)
-        time.sleep(10)
-    else:
-        printC("----------------------------------------------------")
-        printC("Failed again to update " + str(f.name) + ", not trying again")
-        printC("----------------------------------------------------")
-        addMangaProgress(seriesID)
-        time.sleep(10)
-        continue
+# for f in failed:
+#     md = getMangaMetadata(f.name)
+#     if (md.isvalid == False):
+#         printC("----------------------------------------------------")
+#         printC("Failed again to update " + str(f.name) + ", not trying again")
+#         printC("----------------------------------------------------")
+#         time.sleep(10)
+#         continue
+#     jsondata = """{
+#       "status": %s,
+#       "statusLock": true,
+#       "summary": "%s",
+#       "summaryLock": true,
+#       "publisher": "%s",
+#       "publisherLock": true,
+#       "genres": %s,
+#       "genresLock": true,
+#       "tags": %s,
+#       "tagsLock": true
+#     }""" % (md.status, md.summary.replace('\n', '\\n'), md.publisher, md.genres, md.tags)
+#     pushdata = jsondata.replace("\n", "").replace("{  \\\"status\\\": ", "{\\\"status\\\":").replace(",  \\\"statusLock\\\": ", ",\\\"statusLock\\\":").replace(",  \\\"summary\\\": ", ",\\\"summary\\\":").replace(",  \\\"summaryLock\\\": ", ",\\\"summaryLock\\\":").replace("\n", "").replace("\r", "")
+#     printC(pushdata)
+#     headers = {'Content-Type': 'application/json', 'accept': '*/*'}
+#     patch = requests.patch(komgaurl + "/api/v1/series/" + seriesID + "/metadata", data=str.encode(pushdata), auth = (komgaemail, komgapassword), headers=headers)
+#     if(patch.status_code == 204):
+#         printC("++++++++++++++++++++++++++++++++++++++++++++++++++++")
+#         printC("Successfully updated " + str(f.name), 'success')
+#         printC("++++++++++++++++++++++++++++++++++++++++++++++++++++")
+#         addMangaProgress(seriesID)
+#         time.sleep(10)
+#     else:
+#         printC("----------------------------------------------------")
+#         printC("Failed again to update " + str(f.name) + ", not trying again")
+#         printC("----------------------------------------------------")
+#         addMangaProgress(seriesID)
+#         time.sleep(10)
+#         continue

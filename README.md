@@ -13,6 +13,7 @@ I have updated and done some private work :
 - print push data only if fails
 - not resynchronizing if status is ended and status lock (we consider that if status lock; it has been by the synchronizer). If you want to resync; you just have to remove lock state on status in the UI.
 - info in print has been reviewed : colors and typings :)
+- review code about json to string 
 
 ## Introduction
 This Script gets a list of every manga available on your Komga instance,
