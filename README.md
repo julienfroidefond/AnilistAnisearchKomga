@@ -14,6 +14,21 @@ I have updated and done some private work :
 - not resynchronizing if status is ended and status lock (we consider that if status lock; it has been by the synchronizer). If you want to resync; you just have to remove lock state on status in the UI.
 - info in print has been reviewed : colors and typings :)
 - review code about json to string 
+- Anilist synchronizer !
+
+## About Anilist sync
+Go to https://anilist.co/settings/developer and click "Create New Api v2 client", then enter your client name and redirect URI : https://anilist.co/api/v2/oauth/pin. After clicking Save you'll receive your client ID and secret.
+You have to define in environment this variables :
+
+- ACTIVATEANILIST must be "true"
+- ANILISTID
+- ANILISTSECRET
+
+The script will ask you the code for generating token (just follow the cli).
+The token is registered in the datas.json file. Just delete it in the file to reset.
+
+New file for sync has appears : `datas.json`. You can change ids of anilist if the matching was not good.
+FYI : On anilist, we filter on manga and no hentai.
 
 ## Introduction
 This Script gets a list of every manga available on your Komga instance,

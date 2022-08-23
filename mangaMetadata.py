@@ -1,5 +1,5 @@
 from pickle import FALSE, TRUE
-import requests, json, time, sys, os
+import requests, json, time, sys, os, signal, webbrowser
 
 from io import StringIO, BytesIO
 
@@ -58,6 +58,18 @@ try:
 except:
     ENV_LIBS = "NONE"
 try:
+    ENV_ACTIVATEANILIST = os.environ['ACTIVATEANILIST'] == 'true'
+except:
+    ENV_ACTIVATEANILIST = False
+try:
+    ENV_ANILISTID = os.environ['ANILISTID']
+except:
+    ENV_ANILISTID = ""
+try:
+    ENV_ANILISTSECRET = os.environ['ANILISTSECRET']
+except:
+    ENV_ANILISTSECRET = ""
+try:
     ENV_PROGRESS = os.environ['KEEPPROGRESS']
     if(ENV_PROGRESS.lower() == "true"):
         ENV_PROGRESS = True
@@ -107,6 +119,12 @@ if(anisearchlang not in langs):
     printC("Invalid language, select one listed the README", 'error')
     sys.exit(1)
 
+activateAnilistSync = False
+if(ENV_ACTIVATEANILIST == True and ENV_ANILISTID != "" and ENV_ANILISTSECRET != ''):
+    activateAnilistSync=True
+    printC("Synchronization Anilist is activated")
+else:
+    printC("No synchronization Anilist")
 
 def getBaseURL():
     if(anisearchlang == "German"):
@@ -145,6 +163,7 @@ tagTexts = ["Hauptgenres", "Main genres", "Género principal", "Principaux genre
 noSummaryLang = ["Damit hilfst Du der gesamten deutschsprachigen Anime und Manga-Community", "We’re looking forward to your contributions", "Con esto ayudas a toda la comunidad de Anime y Manga", "Nous attendons avec impatience tes contributions", "Non vediamo l’ora di ricevere i tuoi contributi", "皆様からのご投稿をお待ちしております"]
 blurbLang = ["Klappentext", "Blurb", "Texto de presentación", "Texte du rabat", "Testo della bandella"]
 
+
 class metadata:
     def __init__(self):
             self.status = ""
@@ -178,7 +197,7 @@ def getURLfromSearch(query):
         parser = etree.HTMLParser()
         html_dom = etree.HTML(content, parser)
     except ParserError as e:
-        printC(e, 'debug')
+        printC(str(e), 'debug')
     try:
         manga_url = html_dom.xpath("//*[@id=\"content-inner\"]/ul[2]/li[1]/a/@href")[0]
         return getBaseURL() + manga_url
@@ -190,6 +209,13 @@ def getURLfromSearch(query):
 #out.close()
 
 #printC(getURLfromSearch("adekan"))
+
+# Reading datas
+datas={"series":[]}
+with open('datas.json') as json_file:
+    datas = json.load(json_file)
+    if("series" not in datas.keys()):
+        datas={"series":[]}
 
 def getMangaMetadata(query):
     printC("Getting metadata for " + str(query))
@@ -220,7 +246,7 @@ def getMangaMetadata(query):
         parser = etree.HTMLParser()
         html_dom = etree.HTML(content, parser)
     except ParserError as e:
-        printC(e, 'debug')
+        printC(str(e), 'debug')
         return data
 
     #getLangIndex
@@ -264,7 +290,7 @@ def getMangaMetadata(query):
             status = html_dom.xpath("//*[@id=\"information\"]/div/ul/li[2]/ul/li[1]/div[3]")[0].itertext()
             status = ''.join(status).split(": ")[1]
         except Exception as e:
-            printC(e, 'debug')
+            printC(str(e), 'debug')
             printC("Failed to get status", 'error')
 
     if(status != ""):
@@ -290,7 +316,7 @@ def getMangaMetadata(query):
             totalBookCount = html_dom.xpath("//*[@id=\"information\"]/div/ul/li[2]/ul/li[1]/div[@class=\"releases\"]")[0].itertext()
             totalBookCount = ''.join(totalBookCount).split(": ")[1].split(" / ")[0].replace("+", "")
         except Exception as e:
-            printC(e, 'debug')
+            printC(str(e), 'debug')
             printC("Failed to get totalBookCount", 'error')
 
     data.totalBookCount = totalBookCount
@@ -368,7 +394,7 @@ def getMangaMetadata(query):
             publisher = html_dom.xpath("//*[@id=\"information\"]/div/ul/li[2]/ul/li[1]/div[6]")[0].itertext()
             publisher = ''.join(publisher)
         except Exception as e:
-            printC(e, 'debug')
+            printC(str(e), 'debug')
             printC("Failed to get publisher", 'error')
     if(publisher != ""):
         publisher = publisher.split(": ")[1]
@@ -394,7 +420,7 @@ def getMangaMetadata(query):
                     taglist.append(tagstring)
             i += 1
         except Exception as e:
-#            printC(e, 'debug')
+#            printC(str(e), 'debug')
             running = False
 
     if(len(genrelist) > 0):
@@ -406,6 +432,139 @@ def getMangaMetadata(query):
     data.isvalid = True
     return data
 
+
+def anilistGet(name, seriesID):
+    printC("get and write JSON anilist for "+name)
+    currentSerie = None
+    for serieData in datas["series"]:
+        if(serieData["name"]==name):
+            currentSerie = serieData
+    if currentSerie is None:
+        datas["series"].append({"name":name, "komgaId":seriesID})
+
+    for serieData in datas["series"]:
+        if(serieData["name"]==name):
+            currentSerie = serieData
+            
+    try:
+        if("anilistInfo" not in currentSerie.keys()):
+            query = '''
+            query ($search: String) {
+                Page {
+                    media (search: $search, type: MANGA, format: MANGA, , genre_not_in: "Hentai") {
+                        id
+                        title {
+                            romaji
+                            english
+                            native
+                            userPreferred
+                        }
+                        volumes
+                    }
+                }
+            }
+            '''
+            variables = {
+                'search': currentSerie["name"]
+            }
+            url = 'https://graphql.anilist.co'
+            printC("Getting info from anilist")
+            response = requests.post(url, json={'query': query, 'variables': variables})
+            resData = json.loads(response.text)
+            if "data" in resData.keys():
+                if(len(resData["data"]["Page"]["media"]) > 0):
+                    currentSerie["anilistInfo"] = resData["data"]["Page"]["media"][0]
+                    printC("Successfully get from anilist for " + currentSerie["name"], 'success')
+                    return currentSerie["anilistInfo"]
+                else:
+                    # printC(json.dumps(resData,skipkeys = True),'debug')
+                    # printC(json.dumps(query,skipkeys = True),'debug')
+                    # printC(json.dumps(variables,skipkeys = True),'debug')
+                    printC("Manga not found on anilist : "+name, "error")
+            else:
+                printC(resData,"debug")
+        else:
+            return currentSerie["anilistInfo"]
+
+    except Exception as e:
+        printC(str(e), "debug")
+        printC("Failed to get from anilist", 'error')
+        return {"id":0}
+
+def aniListConnect():
+    accessToken=''
+    if("anilistAccessToken" not in datas.keys()):
+        input("Now we will invite you to generate a code for doing update in your Anilit account (Press Enter)")
+        webbrowser.open("https://anilist.co/api/v2/oauth/authorize?client_id="+ENV_ANILISTID+"&redirect_uri=https://anilist.co/api/v2/oauth/pin&response_type=code")
+        code = input("Paste here : \n")
+        datas["anilistUserCode"] = code
+        response =requests.post("https://anilist.co/api/v2/oauth/token", headers = {
+            "Content-Type": "application/json",
+            'Accept': 'application/json'
+            }, json={
+            'grant_type': 'authorization_code',
+            'client_id': ENV_ANILISTID,
+            'client_secret': ENV_ANILISTSECRET,
+            'redirect_uri': 'https://anilist.co/api/v2/oauth/pin',
+            'code': code
+        })
+        print(json.loads(response.text))
+        accessToken = json.loads(response.text)['access_token']
+        printC("Successfully get a token from anilist for user", "success")
+        datas["anilistAccessToken"] = accessToken
+    else:
+        accessToken = datas["anilistAccessToken"]
+    return accessToken
+
+def anilistAdd(anilistId, name, booksReadCount, booksCount, accessToken):
+    if anilistId != 0:
+        status="PLANNING"
+        if booksReadCount == 0:
+            status="PLANNING"
+        elif booksReadCount == booksCount:
+            status="COMPLETED"
+        elif booksReadCount > 0:
+            status="CURRENT"
+
+        query = '''
+        mutation ($mediaId: Int, $status: MediaListStatus, $progressVolumes: Int) {
+            SaveMediaListEntry (mediaId: $mediaId, status: $status, progressVolumes: $progressVolumes) {
+                id
+                status
+            }
+        }
+        ''';
+        variables = {
+            "mediaId" : anilistId,
+            "status" : status,
+            "progressVolumes" : booksReadCount
+        };
+        res = requests.post("https://graphql.anilist.co", headers = {
+            "Content-Type": "application/json",
+            'Accept': 'application/json',
+            "Authorization": "Bearer " + accessToken
+            }, json = {
+                'query' : query,
+                'variables' :variables
+        })
+        jsonRes = json.loads(res.text)
+        if("data" in jsonRes.keys()):
+            printC("Successfully anilist synchronized " + name + " in status " + status + " with " + str(booksReadCount) + " volumes", "success")
+        else:
+            printC("Error when uploading on anilist : "+jsonRes, "error")
+
+def writeDatasJSON():
+    with open('datas.json', 'w') as outfile:
+        json.dump(datas, outfile, indent=3)
+        printC("Successfully write to JSON !", 'success')
+
+def handler(signum, frame):
+    printC("Quittind app by SIGINT; writing")
+    writeDatasJSON()
+    sys.exit(1)
+    
+signal.signal(signal.SIGINT, handler)
+
 p_context = sync_playwright()
 p = p_context.__enter__()
 browser = p.chromium.launch()
@@ -414,6 +573,10 @@ page.goto(getBaseURL())
 
 
 printC("Using user " + komgaemail)
+printC("Using server " + komgaurl)
+if activateAnilistSync:
+    printC("Using anilist client id " + ENV_ANILISTID)
+    printC("Using anilist secret id " + ENV_ANILISTSECRET)
 
 
 libreq = requests.get(komgaurl + '/api/v1/libraries', auth = (komgaemail, komgapassword))
@@ -427,7 +590,7 @@ seriesnum = 0
 try:
     expected = json_string['numberOfElements']
 except:
-    printC("ailed to get list of mangas, are the login infos correct?", 'error')
+    printC("Failed to get list of mangas, are the login infos correct?", 'error')
     sys.exit(1)
 
 printC("Series to do: " + str(expected))
@@ -458,21 +621,21 @@ if(keepProgress):
     except:
         printC("Failed to load list of mangas", 'error')
 
+if activateAnilistSync:
+    accessToken = aniListConnect()
+
 failedfile = open("failed.txt", "w")
 for series in json_string['content']:
+    seriesID = series['id']
+    name = series['metadata']['title']
+    
     seriesnum += 1
     isFinished = False
     if (series['metadata']['statusLock'] == True and series['metadata']['status'] == 'ENDED'):
         isFinished = True
-    name = series['metadata']['title']
-    if (isFinished == True):
-        printC("Ignoring "+str(name)+" : series terminated and already synchronized", 'warn')
-        continue
     if(len(mangas) > 0):
         if(series['name'] not in mangas):
             continue
-    printC("Number: " + str(seriesnum) + "/" + str(expected))
-    seriesID = series['id']
 
     if(len(libraries) > 0):
         libraryId = series['libraryId']
@@ -481,8 +644,18 @@ for series in json_string['content']:
             if libKom['id'] == libraryId:
                 currentLib = libKom['name']
         if(currentLib not in libraries):
-            printC("ignoring "+str(name)+" not in right lib", 'warn')
+            # printC("ignoring "+str(name)+" not in right lib", 'warn')
             continue
+    
+    if activateAnilistSync:
+        anilistData = anilistGet(name, seriesID)
+        anilistAdd(anilistData["id"], name, series['booksReadCount'], series['booksCount'], accessToken)
+
+    if (isFinished == True):
+        printC("Ignoring "+str(name)+" : series terminated and already synchronized", 'warn')
+        continue
+    printC("Number: " + str(seriesnum) + "/" + str(expected))
+
     
     if(str(seriesID) in progresslist):
         printC("Manga " + str(name) + " was already updated, skipping...")
@@ -539,7 +712,11 @@ for series in json_string['content']:
         except:
             pass
 
+writeDatasJSON()
+
 failedfile.close()
+
+
 
 # for f in failed:
 #     md = getMangaMetadata(f.name)
