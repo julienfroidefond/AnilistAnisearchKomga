@@ -30,6 +30,8 @@ The token is registered in the datas.json file. Just delete it in the file to re
 New file for sync has appears : `datas.json`. You can change ids of anilist if the matching was not good.
 FYI : On anilist, we filter on manga and no hentai.
 
+# Original readme
+
 ## Introduction
 This Script gets a list of every manga available on your Komga instance,
 looks it up one after another on [Anisearch](https://www.anisearch.com/) and gets the metadata for the specific series.
