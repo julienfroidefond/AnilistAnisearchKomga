@@ -225,10 +225,13 @@ def getURLfromSearch(query):
 
 # Reading datas
 datas={"series":[]}
-with open('datas.json') as json_file:
-    datas = json.load(json_file)
-    if("series" not in datas.keys()):
-        datas={"series":[]}
+try:
+    with open('datas.json') as json_file:
+        datas = json.load(json_file)
+        if("series" not in datas.keys()):
+            datas={"series":[]}
+except:
+    datas={"series":[]}
 
 def getMangaMetadata(query):
     printC("Getting metadata for " + str(query))
@@ -740,105 +743,107 @@ for series in json_string['content']:
         if(serieData["name"]==name):
             currentSerie = serieData
 
+    skipUpdate = False
+    skipSync = False
+    seriesnum += 1
+    isFinished = False
+    if (series['metadata']['statusLock'] == True and series['metadata']['status'] == 'ENDED'):
+        isFinished = True
     if currentSerie is not None :
-        skipUpdate = False
-        skipSync = False
-        seriesnum += 1
-        isFinished = False
-        if (series['metadata']['statusLock'] == True and series['metadata']['status'] == 'ENDED'):
-            isFinished = True
         if "metadatas" not in currentSerie :
             printC("No metadatas in datas; we force update for " + name, "error")
             isFinished = False
-        if(len(mangas) > 0):
-            if(series['name'] not in mangas):
-                skipUpdate = True
-                skipSync = True
-
-        if(len(libraries) > 0):
-            libraryId = series['libraryId']
-            currentLib = ""
-            for libKom in json_lib:
-                if libKom['id'] == libraryId:
-                    currentLib = libKom['name']
-            if(currentLib not in libraries):
-                # printC("ignoring "+str(name)+" not in right lib", 'warn')
-                skipUpdate = True
-                skipSync = True
-        
-        if activateAnilistSync and skipSync is False:
-            anilistData = anilistGet(name, seriesID)
-
-        if (isFinished == True and forceUpdateFull is False):
-            printC("Ignoring "+str(name)+" : series terminated and already synchronized", 'warn')
+    if(len(mangas) > 0):
+        if(series['name'] not in mangas):
             skipUpdate = True
+            skipSync = True
 
-        printC("Number: " + str(seriesnum) + "/" + str(expected))
-        
-        if(str(seriesID) in progresslist):
-            printC("Manga " + str(name) + " was already updated, skipping...")
+    if(len(libraries) > 0):
+        libraryId = series['libraryId']
+        currentLib = ""
+        for libKom in json_lib:
+            if libKom['id'] == libraryId:
+                currentLib = libKom['name']
+        if(currentLib not in libraries):
+            # printC("ignoring "+str(name)+" not in right lib", 'warn')
             skipUpdate = True
+            skipSync = True
+    
+    if activateAnilistSync and skipSync is False:
+        anilistData = anilistGet(name, seriesID)
 
-        if(skipUpdate is False):
-            printC("Updating: " + str(name))
-            md = getMangaMetadata(name)
-            if(md.isvalid == False):
+    if (isFinished == True and forceUpdateFull is False):
+        printC("Ignoring "+str(name)+" : series terminated and already synchronized", 'warn')
+        skipUpdate = True
+
+    printC("Number: " + str(seriesnum) + "/" + str(expected))
+    
+    if(str(seriesID) in progresslist):
+        printC("Manga " + str(name) + " was already updated, skipping...")
+        skipUpdate = True
+
+    if(skipUpdate is False):
+        printC("Updating: " + str(name))
+        md = getMangaMetadata(name)
+        if(md.isvalid == False):
+            printC("----------------------------------------------------")
+            printC("Failed to update " + str(name) + ", trying again at the end", 'error')
+            printC("----------------------------------------------------")
+            fail = failedtries(seriesID, name)
+            failed.append(fail)
+            failedfile.write(str(seriesID))
+            failedfile.write(name)
+            time.sleep(10)
+            continue
+        jsonToPush = {
+            "language": "fr",
+            "languageLock": True,
+            "status": md.status,
+            "statusLock": True,
+            "summary": md.summary,
+            "summaryLock": True,
+            "publisher": md.publisher,
+            "publisherLock": True,
+            "genres": md.genres,
+            "genresLock": True,
+            "tags": md.tags,
+            "tagsLock": True,
+            "totalBookCount": md.totalBookCount,
+            "totalBookCountLock": True
+        }
+        currentSerie["metadatas"] = {
+            "status": md.status,
+            "totalBookCount": md.totalBookCount,
+            "totalChaptersCount": md.totalChaptersCount,
+        }
+        pushdata = json.dumps(jsonToPush, ensure_ascii=False).replace("\n", "").replace("\r", "")
+        headers = {'Content-Type': 'application/json', 'accept': '*/*'}
+        patch = requests.patch(komgaurl + "/api/v1/series/" + seriesID + "/metadata", data=str.encode(pushdata), auth = (komgaemail, komgapassword), headers=headers)
+        if(patch.status_code == 204):
+            printC("----------------------------------------------------")
+            printC("Successfully updated " + str(name), 'success')
+            printC("----------------------------------------------------")
+            addMangaProgress(seriesID)
+            time.sleep(10)
+        else:
+            try:
                 printC("----------------------------------------------------")
-                printC("Failed to update " + str(name) + ", trying again at the end", 'error')
+                printC(pushdata, "debug")
+                printC("Failed to update " + str(name), 'error')
+                printC(patch, 'error')
+                printC(patch.text, 'error')
                 printC("----------------------------------------------------")
-                fail = failedtries(seriesID, name)
-                failed.append(fail)
                 failedfile.write(str(seriesID))
                 failedfile.write(name)
-                time.sleep(10)
-                continue
-            jsonToPush = {
-                "language": "fr",
-                "languageLock": True,
-                "status": md.status,
-                "statusLock": True,
-                "summary": md.summary,
-                "summaryLock": True,
-                "publisher": md.publisher,
-                "publisherLock": True,
-                "genres": md.genres,
-                "genresLock": True,
-                "tags": md.tags,
-                "tagsLock": True,
-                "totalBookCount": md.totalBookCount,
-                "totalBookCountLock": True
-            }
-            currentSerie["metadatas"] = {
-                "status": md.status,
-                "totalBookCount": md.totalBookCount,
-                "totalChaptersCount": md.totalChaptersCount,
-            }
-            pushdata = json.dumps(jsonToPush, ensure_ascii=False).replace("\n", "").replace("\r", "")
-            headers = {'Content-Type': 'application/json', 'accept': '*/*'}
-            patch = requests.patch(komgaurl + "/api/v1/series/" + seriesID + "/metadata", data=str.encode(pushdata), auth = (komgaemail, komgapassword), headers=headers)
-            if(patch.status_code == 204):
-                printC("----------------------------------------------------")
-                printC("Successfully updated " + str(name), 'success')
-                printC("----------------------------------------------------")
-                addMangaProgress(seriesID)
-                time.sleep(10)
-            else:
-                try:
-                    printC("----------------------------------------------------")
-                    printC(pushdata, "debug")
-                    printC("Failed to update " + str(name), 'error')
-                    printC(patch, 'error')
-                    printC(patch.text, 'error')
-                    printC("----------------------------------------------------")
-                    failedfile.write(str(seriesID))
-                    failedfile.write(name)
-                    fail = failedtries(seriesID, name)
-                    failed.append(fail)
-                except:
-                    pass
-        
+                fail = failedtries(seriesID, name)
+                failed.append(fail)
+            except:
+                pass
+            
+    if currentSerie is not None :
         if activateAnilistSync and skipSync is False:
             anilistAdd(anilistData, name, series, userMediaList, accessToken, currentSerie["metadatas"])
+
 
 writeDatasJSON()
 print(resume)
