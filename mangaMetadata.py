@@ -1,5 +1,6 @@
 from pickle import FALSE, TRUE
-import requests, json, time, sys, os, signal, webbrowser
+import requests, json, time, sys, os, signal, webbrowser, math
+from datetime import datetime
 
 from io import StringIO, BytesIO
 
@@ -7,6 +8,8 @@ from lxml import etree
 from lxml.etree import ParserError
 
 from playwright.sync_api import sync_playwright
+
+resume = "\n\n-----RESUME-----\n"
 
 class bcolors:
     HEADER = '\033[95m'
@@ -22,16 +25,22 @@ class bcolors:
 langs = ["German", "English", "Spanish", "French", "Italian", "Japanese"]
 
 def printC(msg, type = 'info'):
+    now = datetime.now()
+    dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+    global resume
     if(type == "error"):
-        print(bcolors.FAIL+"[ERROR] : "+msg+bcolors.ENDC)
+        resume += bcolors.FAIL+ dt_string + " - [ERROR] : "+msg+bcolors.ENDC+"\n"
+        print(bcolors.FAIL+ dt_string + " - [ERROR] : "+msg+bcolors.ENDC)
     elif(type=="success"):
-        print(bcolors.OKGREEN+"[SUCCESS] : "+msg+bcolors.ENDC)
+        resume += bcolors.OKGREEN+ dt_string + " - [SUCCESS] : "+msg+bcolors.ENDC+"\n"
+        print(bcolors.OKGREEN+ dt_string + " - [SUCCESS] : "+msg+bcolors.ENDC)
     elif(type=="debug"):
-        print(bcolors.WARNING+"[DEBUG] : "+msg+bcolors.ENDC)
+        print(bcolors.WARNING+ dt_string + " - [DEBUG] : "+msg+bcolors.ENDC)
     elif(type=="warn"):
-        print(bcolors.WARNING+"[WARN] : "+msg+bcolors.ENDC)
+        resume += bcolors.WARNING+ dt_string + " - [WARN] : "+msg+bcolors.ENDC+"\n"
+        print(bcolors.WARNING+ dt_string + " - [WARN] : "+msg+bcolors.ENDC)
     else:
-        print(bcolors.OKBLUE+"[INFO] : "+msg+bcolors.ENDC)
+        print(bcolors.OKBLUE + dt_string + " - [INFO] : "+msg+bcolors.ENDC)
 
 try:
     ENV_URL = os.environ['KOMGAURL']
@@ -61,6 +70,10 @@ try:
     ENV_ACTIVATEANILIST = os.environ['ACTIVATEANILIST'] == 'true'
 except:
     ENV_ACTIVATEANILIST = False
+try:
+    ENV_ANILISTUSERNAME = os.environ['ANILISTUSERNAME']
+except:
+    ENV_ANILISTUSERNAME = "julienfroidefond"
 try:
     ENV_ANILISTID = os.environ['ANILISTID']
 except:
@@ -120,11 +133,11 @@ if(anisearchlang not in langs):
     sys.exit(1)
 
 activateAnilistSync = False
-if(ENV_ACTIVATEANILIST == True and ENV_ANILISTID != "" and ENV_ANILISTSECRET != ''):
+if(ENV_ACTIVATEANILIST == True and ENV_ANILISTID != "" and ENV_ANILISTSECRET != '' and ENV_ANILISTUSERNAME != ''):
     activateAnilistSync=True
     printC("Synchronization Anilist is activated")
 else:
-    printC("No synchronization Anilist")
+    printC("No synchronization Anilist. Please check environment variables.", "warn")
 
 def getBaseURL():
     if(anisearchlang == "German"):
@@ -222,7 +235,7 @@ def getMangaMetadata(query):
     status = ""         #done
     summary = ""        #done
     publisher = ""      #done
-#    agerating = ""
+    #agerating = ""
     genres = []
     tags = []
 
@@ -265,7 +278,7 @@ def getMangaMetadata(query):
                 else:
                     statusIndex = 2
                     publisherIndex = 5
-#                printC("Found correct Language, index is " + str(rightIndex))
+                    #printC("Found correct Language, index is " + str(rightIndex))
                 langRunning = False
                 break
             index += 1
@@ -320,6 +333,21 @@ def getMangaMetadata(query):
             printC("Failed to get totalBookCount", 'error')
 
     data.totalBookCount = totalBookCount
+
+    #getTotalChaptersCount
+    try:
+        totalChaptersCount = html_dom.xpath("//*[@id=\"information\"]/div/ul/li[2]/ul/li[" + forcedIndex + "]/div[@class=\"releases\"]")[0].itertext()
+        totalChaptersCount = ''.join(totalChaptersCount).split(": ")[1].split(" / ")[1].replace("+", "")
+        # printC("totalChaptersCount : "+totalChaptersCount, 'debug')
+    except Exception as e:
+        try:
+            totalChaptersCount = html_dom.xpath("//*[@id=\"information\"]/div/ul/li[2]/ul/li[1]/div[@class=\"releases\"]")[0].itertext()
+            totalChaptersCount = ''.join(totalChaptersCount).split(": ")[1].split(" / ")[1].replace("+", "")
+        except Exception as e:
+            printC(str(e), 'debug')
+            printC("Failed to get totalChaptersCount", 'error')
+
+    data.totalChaptersCount = totalChaptersCount
 
     #getSummary
     try:
@@ -420,7 +448,7 @@ def getMangaMetadata(query):
                     taglist.append(tagstring)
             i += 1
         except Exception as e:
-#            printC(str(e), 'debug')
+            #printC(str(e), 'debug')
             running = False
 
     if(len(genrelist) > 0):
@@ -431,7 +459,6 @@ def getMangaMetadata(query):
 
     data.isvalid = True
     return data
-
 
 def anilistGet(name, seriesID):
     printC("get and write JSON anilist for "+name)
@@ -460,6 +487,7 @@ def anilistGet(name, seriesID):
                             userPreferred
                         }
                         volumes
+                        chapters
                     }
                 }
             }
@@ -475,15 +503,18 @@ def anilistGet(name, seriesID):
                 if(len(resData["data"]["Page"]["media"]) > 0):
                     currentSerie["anilistInfo"] = resData["data"]["Page"]["media"][0]
                     printC("Successfully get from anilist for " + currentSerie["name"], 'success')
+                    logStatus(datas, name, "anilist get", "Manga found all ok", True)
                     return currentSerie["anilistInfo"]
                 else:
                     # printC(json.dumps(resData,skipkeys = True),'debug')
                     # printC(json.dumps(query,skipkeys = True),'debug')
                     # printC(json.dumps(variables,skipkeys = True),'debug')
                     printC("Manga not found on anilist : "+name, "error")
+                    logStatus(datas, name, "anilist get", "Manga not found on anilist", True)
             else:
                 printC(resData,"debug")
         else:
+            logStatus(datas, name, "anilist get", "Manga already in local", True)
             return currentSerie["anilistInfo"]
 
     except Exception as e:
@@ -516,42 +547,111 @@ def aniListConnect():
         accessToken = datas["anilistAccessToken"]
     return accessToken
 
-def anilistAdd(anilistId, name, booksReadCount, booksCount, accessToken):
+def getUserCurrentLists():
+    query = '''
+    query ($userName: String) {
+        Page {
+            mediaList(userName: $userName) {
+            mediaId
+            status
+            progressVolumes
+            }
+        }
+    }
+    '''
+    variables = {
+        'userName': ENV_ANILISTUSERNAME
+    }
+    url = 'https://graphql.anilist.co'
+    printC("Getting user's lists from anilist for " + ENV_ANILISTUSERNAME)
+    response = requests.post(url, json={'query': query, 'variables': variables})
+    resData = json.loads(response.text)
+    return resData['data']['Page']['mediaList']
+ 
+def anilistAdd(anilistData, name, series, userMediaList, accessToken, md):
+    booksReadCount = series['booksReadCount']
+    totalBookCount = series['metadata']['totalBookCount']
+    totalChaptersCount = md["totalChaptersCount"]
+
+    anilistId=anilistData["id"]
     if anilistId != 0:
+        currentUserMedia = None
+        for userMedia in userMediaList:
+            if(userMedia['mediaId'] == anilistId):
+                currentUserMedia = userMedia
+        
         status="PLANNING"
-        if booksReadCount == 0:
+        if booksReadCount == 0 or totalBookCount is None:
             status="PLANNING"
-        elif booksReadCount == booksCount:
+        elif booksReadCount == totalBookCount:
             status="COMPLETED"
         elif booksReadCount > 0:
             status="CURRENT"
 
-        query = '''
-        mutation ($mediaId: Int, $status: MediaListStatus, $progressVolumes: Int) {
-            SaveMediaListEntry (mediaId: $mediaId, status: $status, progressVolumes: $progressVolumes) {
-                id
-                status
+        progressChapters=0
+        if(totalChaptersCount is not None and totalBookCount is not None):
+            if(status == "COMPLETED"):
+                progressChapters = int(totalChaptersCount)
+            else:
+                chapByVol = int(totalBookCount) / int(totalChaptersCount)
+                progressChapters= math.ceil(currentUserMedia['progressVolumes'] / chapByVol)
+
+        hasToUpdate = True
+        if(currentUserMedia):
+            if(currentUserMedia['status'] != "PLANNING" and currentUserMedia['status'] != "COMPLETED" and currentUserMedia['status'] != "CURRENT") :
+                printC("Not updating anilist : preserving status : " + currentUserMedia['status'])
+                logStatus(datas, name, "anilist push", "Not updating anilist : preserving status : " + currentUserMedia['status'], True)
+                hasToUpdate = False
+            if(currentUserMedia['status'] == status and booksReadCount <= currentUserMedia['progressVolumes']):
+                printC("Not updating anilist : preserving volumes count : " + str(currentUserMedia['progressVolumes']) + " VS LOCAL : " +str(booksReadCount))
+                logStatus(datas, name, "anilist push", "Not updating anilist : preserving volumes count : " + str(currentUserMedia['progressVolumes']) + " VS LOCAL : " +str(booksReadCount), True)
+                hasToUpdate = False
+
+
+        if(hasToUpdate == True):
+            query = '''
+            mutation ($mediaId: Int, $status: MediaListStatus, $progressVolumes: Int, $progress: Int) {
+                SaveMediaListEntry (mediaId: $mediaId, status: $status, progressVolumes: $progressVolumes, progress: $progress) {
+                    id
+                    status
+                }
             }
-        }
-        ''';
-        variables = {
-            "mediaId" : anilistId,
-            "status" : status,
-            "progressVolumes" : booksReadCount
-        };
-        res = requests.post("https://graphql.anilist.co", headers = {
-            "Content-Type": "application/json",
-            'Accept': 'application/json',
-            "Authorization": "Bearer " + accessToken
-            }, json = {
-                'query' : query,
-                'variables' :variables
-        })
-        jsonRes = json.loads(res.text)
-        if("data" in jsonRes.keys()):
-            printC("Successfully anilist synchronized " + name + " in status " + status + " with " + str(booksReadCount) + " volumes", "success")
-        else:
-            printC("Error when uploading on anilist : "+jsonRes, "error")
+            ''';
+            variables = {
+                "mediaId" : anilistId,
+                "status" : status,
+                "progress" : progressChapters,
+                "progressVolumes" : booksReadCount
+            };
+            res = requests.post("https://graphql.anilist.co", headers = {
+                "Content-Type": "application/json",
+                'Accept': 'application/json',
+                "Authorization": "Bearer " + accessToken
+                }, json = {
+                    'query' : query,
+                    'variables' :variables
+            })
+            jsonRes = json.loads(res.text)
+            if("data" in jsonRes.keys()):
+                printC("Successfully anilist synchronized " + name + " in status " + status + " with " + str(booksReadCount) + " volumes and " + str(progressChapters) + " chapters", "success")
+                logStatus(datas, name, "anilist push success", "synchronized  in status " + status + " with " + str(booksReadCount) + " volumes and " + str(progressChapters), False)
+            else:
+                printC("Error when uploading on anilist : "+jsonRes, "error")
+                logStatus(datas, name, "anilist push", "Error " + jsonRes, True)
+
+def logStatus(datas, name, type, status, oneTime):
+    currentSerie = None
+    for serieData in datas["series"]:
+        if(serieData["name"]==name):
+            currentSerie = serieData
+    now = datetime.now()
+    dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+    states = {}
+    if("status" in currentSerie.keys()):
+        states=currentSerie["status"]
+
+    states[type] = "[" + dt_string + "] : " + status
+    currentSerie["status"] = states
 
 def writeDatasJSON():
     with open('datas.json', 'w') as outfile:
@@ -560,9 +660,10 @@ def writeDatasJSON():
 
 def handler(signum, frame):
     printC("Quittind app by SIGINT; writing")
+    print(resume)
     writeDatasJSON()
     sys.exit(1)
-    
+
 signal.signal(signal.SIGINT, handler)
 
 p_context = sync_playwright()
@@ -577,6 +678,7 @@ printC("Using server " + komgaurl)
 if activateAnilistSync:
     printC("Using anilist client id " + ENV_ANILISTID)
     printC("Using anilist secret id " + ENV_ANILISTSECRET)
+    printC("Using anilist user " + ENV_ANILISTUSERNAME)
 
 
 libreq = requests.get(komgaurl + '/api/v1/libraries', auth = (komgaemail, komgapassword))
@@ -621,98 +723,125 @@ if(keepProgress):
     except:
         printC("Failed to load list of mangas", 'error')
 
+userMediaList = []
 if activateAnilistSync:
     accessToken = aniListConnect()
+    userMediaList = getUserCurrentLists()
+
+forceUpdateFull = False
 
 failedfile = open("failed.txt", "w")
 for series in json_string['content']:
     seriesID = series['id']
     name = series['metadata']['title']
-    
-    seriesnum += 1
-    isFinished = False
-    if (series['metadata']['statusLock'] == True and series['metadata']['status'] == 'ENDED'):
-        isFinished = True
-    if(len(mangas) > 0):
-        if(series['name'] not in mangas):
-            continue
 
-    if(len(libraries) > 0):
-        libraryId = series['libraryId']
-        currentLib = ""
-        for libKom in json_lib:
-            if libKom['id'] == libraryId:
-                currentLib = libKom['name']
-        if(currentLib not in libraries):
-            # printC("ignoring "+str(name)+" not in right lib", 'warn')
-            continue
-    
-    if activateAnilistSync:
-        anilistData = anilistGet(name, seriesID)
-        anilistAdd(anilistData["id"], name, series['booksReadCount'], series['booksCount'], accessToken)
+    currentSerie = None
+    for serieData in datas["series"]:
+        if(serieData["name"]==name):
+            currentSerie = serieData
 
-    if (isFinished == True):
-        printC("Ignoring "+str(name)+" : series terminated and already synchronized", 'warn')
-        continue
-    printC("Number: " + str(seriesnum) + "/" + str(expected))
+    if currentSerie is not None :
+        skipUpdate = False
+        skipSync = False
+        seriesnum += 1
+        isFinished = False
+        if (series['metadata']['statusLock'] == True and series['metadata']['status'] == 'ENDED'):
+            isFinished = True
+        if "metadatas" not in currentSerie :
+            printC("No metadatas in datas; we force update for " + name, "error")
+            isFinished = False
+        if(len(mangas) > 0):
+            if(series['name'] not in mangas):
+                skipUpdate = True
+                skipSync = True
 
-    
-    if(str(seriesID) in progresslist):
-        printC("Manga " + str(name) + " was already updated, skipping...")
-        continue
-    printC("Updating: " + str(name))
-    md = getMangaMetadata(name)
-    if(md.isvalid == False):
-        printC("----------------------------------------------------")
-        printC("Failed to update " + str(name) + ", trying again at the end", 'error')
-        printC("----------------------------------------------------")
-        fail = failedtries(seriesID, name)
-        failed.append(fail)
-        failedfile.write(str(seriesID))
-        failedfile.write(name)
-        time.sleep(10)
-        continue
-    jsonToPush = {
-        "language": "fr",
-        "languageLock": True,
-        "status": md.status,
-        "statusLock": True,
-        "summary": md.summary,
-        "summaryLock": True,
-        "publisher": md.publisher,
-        "publisherLock": True,
-        "genres": md.genres,
-        "genresLock": True,
-        "tags": md.tags,
-        "tagsLock": True,
-        "totalBookCount": md.totalBookCount,
-        "totalBookCountLock": True
-    }
-    pushdata = json.dumps(jsonToPush, ensure_ascii=False).replace("\n", "").replace("\r", "")
-    headers = {'Content-Type': 'application/json', 'accept': '*/*'}
-    patch = requests.patch(komgaurl + "/api/v1/series/" + seriesID + "/metadata", data=str.encode(pushdata), auth = (komgaemail, komgapassword), headers=headers)
-    if(patch.status_code == 204):
-        printC("----------------------------------------------------")
-        printC("Successfully updated " + str(name), 'success')
-        printC("----------------------------------------------------")
-        addMangaProgress(seriesID)
-        time.sleep(10)
-    else:
-        try:
-            printC("----------------------------------------------------")
-            printC(pushdata, "debug")
-            printC("Failed to update " + str(name), 'error')
-            printC(patch, 'error')
-            printC(patch.text, 'error')
-            printC("----------------------------------------------------")
-            failedfile.write(str(seriesID))
-            failedfile.write(name)
-            fail = failedtries(seriesID, name)
-            failed.append(fail)
-        except:
-            pass
+        if(len(libraries) > 0):
+            libraryId = series['libraryId']
+            currentLib = ""
+            for libKom in json_lib:
+                if libKom['id'] == libraryId:
+                    currentLib = libKom['name']
+            if(currentLib not in libraries):
+                # printC("ignoring "+str(name)+" not in right lib", 'warn')
+                skipUpdate = True
+                skipSync = True
+        
+        if activateAnilistSync and skipSync is False:
+            anilistData = anilistGet(name, seriesID)
+
+        if (isFinished == True and forceUpdateFull is False):
+            printC("Ignoring "+str(name)+" : series terminated and already synchronized", 'warn')
+            skipUpdate = True
+
+        printC("Number: " + str(seriesnum) + "/" + str(expected))
+        
+        if(str(seriesID) in progresslist):
+            printC("Manga " + str(name) + " was already updated, skipping...")
+            skipUpdate = True
+
+        if(skipUpdate is False):
+            printC("Updating: " + str(name))
+            md = getMangaMetadata(name)
+            if(md.isvalid == False):
+                printC("----------------------------------------------------")
+                printC("Failed to update " + str(name) + ", trying again at the end", 'error')
+                printC("----------------------------------------------------")
+                fail = failedtries(seriesID, name)
+                failed.append(fail)
+                failedfile.write(str(seriesID))
+                failedfile.write(name)
+                time.sleep(10)
+                continue
+            jsonToPush = {
+                "language": "fr",
+                "languageLock": True,
+                "status": md.status,
+                "statusLock": True,
+                "summary": md.summary,
+                "summaryLock": True,
+                "publisher": md.publisher,
+                "publisherLock": True,
+                "genres": md.genres,
+                "genresLock": True,
+                "tags": md.tags,
+                "tagsLock": True,
+                "totalBookCount": md.totalBookCount,
+                "totalBookCountLock": True
+            }
+            currentSerie["metadatas"] = {
+                "status": md.status,
+                "totalBookCount": md.totalBookCount,
+                "totalChaptersCount": md.totalChaptersCount,
+            }
+            pushdata = json.dumps(jsonToPush, ensure_ascii=False).replace("\n", "").replace("\r", "")
+            headers = {'Content-Type': 'application/json', 'accept': '*/*'}
+            patch = requests.patch(komgaurl + "/api/v1/series/" + seriesID + "/metadata", data=str.encode(pushdata), auth = (komgaemail, komgapassword), headers=headers)
+            if(patch.status_code == 204):
+                printC("----------------------------------------------------")
+                printC("Successfully updated " + str(name), 'success')
+                printC("----------------------------------------------------")
+                addMangaProgress(seriesID)
+                time.sleep(10)
+            else:
+                try:
+                    printC("----------------------------------------------------")
+                    printC(pushdata, "debug")
+                    printC("Failed to update " + str(name), 'error')
+                    printC(patch, 'error')
+                    printC(patch.text, 'error')
+                    printC("----------------------------------------------------")
+                    failedfile.write(str(seriesID))
+                    failedfile.write(name)
+                    fail = failedtries(seriesID, name)
+                    failed.append(fail)
+                except:
+                    pass
+        
+        if activateAnilistSync and skipSync is False:
+            anilistAdd(anilistData, name, series, userMediaList, accessToken, currentSerie["metadatas"])
 
 writeDatasJSON()
+print(resume)
 
 failedfile.close()
 

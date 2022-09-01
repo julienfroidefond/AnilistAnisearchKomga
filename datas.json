@@ -1,20 +1,6 @@
 {
    "series": [
       {
-         "name": "L'Attaque des Titans",
-         "komgaId": "09K4YTSTN7MM9",
-         "anilistInfo": {
-            "id": 53390,
-            "title": {
-               "romaji": "Shingeki no Kyojin",
-               "english": "Attack on Titan",
-               "native": "\u9032\u6483\u306e\u5de8\u4eba",
-               "userPreferred": "Shingeki no Kyojin"
-            },
-            "volumes": 34
-         }
-      },
-      {
          "name": "Ajin",
          "komgaId": "09K4YTT1N7JHG",
          "anilistInfo": {
@@ -25,301 +11,17 @@
                "native": "\u4e9c\u4eba",
                "userPreferred": "Ajin"
             },
-            "volumes": 17
-         }
-      },
-      {
-         "name": "Demon Slayer",
-         "komgaId": "09K4YTT4H7WDR",
-         "anilistInfo": {
-            "id": 106064,
-            "title": {
-               "romaji": "Mato Seihei no Slave",
-               "english": "Chained Soldier",
-               "native": "\u9b54\u90fd\u7cbe\u5175\u306e\u30b9\u30ec\u30a4\u30d6",
-               "userPreferred": "Mato Seihei no Slave"
-            },
-            "volumes": null
-         }
-      },
-      {
-         "name": "Dragon Ball",
-         "komgaId": "09K4YTT6H7HTT",
-         "anilistInfo": {
-            "id": 30042,
-            "title": {
-               "romaji": "Dragon Ball",
-               "english": "Dragon Ball",
-               "native": "\u30c9\u30e9\u30b4\u30f3\u30dc\u30fc\u30eb",
-               "userPreferred": "Dragon Ball"
-            },
-            "volumes": 42
-         }
-      },
-      {
-         "name": "Dr. Stone",
-         "komgaId": "09K4YTTBS7NZG",
-         "anilistInfo": {
-            "id": 98416,
-            "title": {
-               "romaji": "Dr. STONE",
-               "english": "Dr. STONE",
-               "native": "Dr.STONE",
-               "userPreferred": "Dr. STONE"
-            },
-            "volumes": 26
-         }
-      },
-      {
-         "name": "Fairy Tail",
-         "komgaId": "09K4YTTE97S6X",
-         "anilistInfo": {
-            "id": 30598,
-            "title": {
-               "romaji": "FAIRY TAIL",
-               "english": "Fairy Tail",
-               "native": "FAIRY TAIL",
-               "userPreferred": "FAIRY TAIL"
-            },
-            "volumes": 63
-         }
-      },
-      {
-         "name": "Naruto",
-         "komgaId": "09K4YTV357MRP",
-         "anilistInfo": {
-            "id": 30011,
-            "title": {
-               "romaji": "NARUTO",
-               "english": "Naruto",
-               "native": "NARUTO -\u30ca\u30eb\u30c8-",
-               "userPreferred": "NARUTO"
-            },
-            "volumes": 72
-         }
-      },
-      {
-         "name": "One Piece",
-         "komgaId": "09K4YTVDD7MYD",
-         "anilistInfo": {
-            "id": 30013,
-            "title": {
-               "romaji": "ONE PIECE",
-               "english": "One Piece",
-               "native": "ONE PIECE",
-               "userPreferred": "ONE PIECE"
-            },
-            "volumes": null
-         }
-      },
-      {
-         "name": "Ranma 1/2",
-         "komgaId": "09K4YTWNH7KJS",
-         "anilistInfo": {
-            "id": 30023,
-            "title": {
-               "romaji": "Ranma 1/2",
-               "english": "Ranma \u00bd",
-               "native": "\u3089\u3093\u307e1/2",
-               "userPreferred": "Ranma 1/2"
-            },
-            "volumes": 38
-         }
-      },
-      {
-         "name": "Saint Seiya",
-         "komgaId": "09K4YTWRD7SDW",
-         "anilistInfo": {
-            "id": 31045,
-            "title": {
-               "romaji": "Saint Seiya",
-               "english": "Knights of the Zodiac",
-               "native": "\u8056\u95d8\u58eb\u661f\u77e2",
-               "userPreferred": "Saint Seiya"
-            },
-            "volumes": 28
-         }
-      },
-      {
-         "name": "Black Torch",
-         "komgaId": "09K6QKED17K02",
-         "anilistInfo": {
-            "id": 98148,
-            "title": {
-               "romaji": "BLACK TORCH",
-               "english": "Black Torch",
-               "native": "BLACK TORCH",
-               "userPreferred": "BLACK TORCH"
-            },
-            "volumes": 5
-         }
-      },
-      {
-         "name": "Chainsaw Man",
-         "komgaId": "09K6QKEDN7PS3",
-         "anilistInfo": {
-            "id": 105778,
-            "title": {
-               "romaji": "Chainsaw Man",
-               "english": "Chainsaw Man",
-               "native": "\u30c1\u30a7\u30f3\u30bd\u30fc\u30de\u30f3",
-               "userPreferred": "Chainsaw Man"
-            },
-            "volumes": null
-         }
-      },
-      {
-         "name": "Gunnm",
-         "komgaId": "09K6QKFVX7VEW",
-         "anilistInfo": {
-            "id": 30768,
-            "title": {
-               "romaji": "GUNNM",
-               "english": "Battle Angel Alita",
-               "native": "\u9283\u5922",
-               "userPreferred": "GUNNM"
-            },
-            "volumes": 9
-         }
-      },
-      {
-         "name": "Kaiju N\u00b08",
-         "komgaId": "09K6QKFWX7QJ2",
-         "anilistInfo": {
-            "id": 120760,
-            "title": {
-               "romaji": "Kaijuu 8-gou",
-               "english": "Kaiju No.8",
-               "native": "\u602a\u7363\uff18\u53f7",
-               "userPreferred": "Kaijuu 8-gou"
-            },
-            "volumes": null
-         }
-      },
-      {
-         "name": "Solo Leveling",
-         "komgaId": "09K6QKGQD7HZA",
-         "anilistInfo": {
-            "id": 105398,
-            "title": {
-               "romaji": "Na Honjaman Level Up",
-               "english": "Solo Leveling",
-               "native": "\ub098 \ud63c\uc790\ub9cc \ub808\ubca8\uc5c5",
-               "userPreferred": "Na Honjaman Level Up"
-            },
-            "volumes": null
-         }
-      },
-      {
-         "name": "Claymore",
-         "komgaId": "09K6WQ6RN7W3Y",
-         "anilistInfo": {
-            "id": 30583,
-            "title": {
-               "romaji": "CLAYMORE",
-               "english": "Claymore",
-               "native": "CLAYMORE",
-               "userPreferred": "CLAYMORE"
-            },
-            "volumes": 27
-         }
-      },
-      {
-         "name": "Kenshin le vagabond",
-         "komgaId": "09K6WQ6WS7KR9",
-         "anilistInfo": {
-            "id": 30022,
-            "title": {
-               "romaji": "Rurouni Kenshin: Meiji Kenkaku Romantan",
-               "english": "Rurouni Kenshin",
-               "native": "\u308b\u308d\u3046\u306b\u5263\u5fc3 -\u660e\u6cbb\u5263\u5ba2\u6d6a\u6f2b\u8b5a-",
-               "userPreferred": "Rurouni Kenshin: Meiji Kenkaku Romantan"
-            },
-            "volumes": 28
-         }
-      },
-      {
-         "name": "Dragon ball super",
-         "komgaId": "09KS9Q30N7G2S",
-         "anilistInfo": {
-            "id": 86508,
-            "title": {
-               "romaji": "Dragon Ball Super",
-               "english": "Dragon Ball Super",
-               "native": "\u30c9\u30e9\u30b4\u30f3\u30dc\u30fc\u30eb\u8d85",
-               "userPreferred": "Dragon Ball Super"
-            },
-            "volumes": null
-         }
-      },
-      {
-         "name": "Yo-Kai Watch",
-         "komgaId": "09M35F6C57Y7P",
-         "anilistInfo": {
-            "id": 91171,
-            "title": {
-               "romaji": "Youkai Watch",
-               "english": "Yo-kai Watch",
-               "native": "\u5996\u602a\u30a6\u30a9\u30c3\u30c1",
-               "userPreferred": "Youkai Watch"
-            },
-            "volumes": null
-         }
-      },
-      {
-         "name": "Fire Punch",
-         "komgaId": "09MQEQJ8N7HB8",
-         "anilistInfo": {
-            "id": 87170,
-            "title": {
-               "romaji": "Fire Punch",
-               "english": "Fire Punch",
-               "native": "\u30d5\u30a1\u30a4\u30a2\u30d1\u30f3\u30c1",
-               "userPreferred": "Fire Punch"
-            },
-            "volumes": 8
-         }
-      },
-      {
-         "name": "Dragon ball SD",
-         "komgaId": "09P53J2JMEGM4",
-         "anilistInfo": {
-            "id": 53446,
-            "title": {
-               "romaji": "Dragon Ball SD",
-               "english": null,
-               "native": "\u30c9\u30e9\u30b4\u30f3\u30dc\u30fc\u30eb \u30a8\u30b9\u30c7\u30a3\u30fc",
-               "userPreferred": "Dragon Ball SD"
-            },
-            "volumes": null
-         }
-      },
-      {
-         "name": "20th century boys",
-         "komgaId": "09PNBN718EH0R",
-         "anilistInfo": {
-            "id": 30003,
-            "title": {
-               "romaji": "20th Century Boys",
-               "english": "20th Century Boys",
-               "native": "20\u4e16\u7d00\u5c11\u5e74",
-               "userPreferred": "20th Century Boys"
-            },
-            "volumes": 22
-         }
-      },
-      {
-         "name": "Platinum end",
-         "komgaId": "09PNBNBECEYJB",
-         "anilistInfo": {
-            "id": 86526,
-            "title": {
-               "romaji": "Platinum End",
-               "english": "Platinum End",
-               "native": "\u30d7\u30e9\u30c1\u30ca\u30a8\u30f3\u30c9",
-               "userPreferred": "Platinum End"
-            },
-            "volumes": 14
+            "volumes": 17,
+            "chapters": 99
+         },
+         "metadatas": {
+            "status": "ENDED",
+            "totalBookCount": "17",
+            "totalChaptersCount": "83"
+         },
+         "status": {
+            "anilist push": "[01/09/2022 13:52:24] : Not updating anilist : preserving volumes count : 17 VS LOCAL : 17",
+            "anilist get": "[01/09/2022 13:52:24] : Manga already in local"
          }
       },
       {
@@ -333,7 +35,521 @@
                "native": "\u9b3c\u6ec5\u306e\u5203",
                "userPreferred": "Kimetsu no Yaiba"
             },
-            "volumes": 23
+            "volumes": 23,
+            "chapters": 208
+         },
+         "metadatas": {
+            "status": "ENDED",
+            "totalBookCount": "23",
+            "totalChaptersCount": "205"
+         },
+         "status": {
+            "anilist push": "[01/09/2022 13:52:24] : Not updating anilist : preserving volumes count : 0 VS LOCAL : 0",
+            "anilist get": "[01/09/2022 13:52:24] : Manga already in local"
+         }
+      },
+      {
+         "name": "Dragon Ball",
+         "komgaId": "09K4YTT6H7HTT",
+         "anilistInfo": {
+            "id": 30042,
+            "title": {
+               "romaji": "Dragon Ball",
+               "english": "Dragon Ball",
+               "native": "\u30c9\u30e9\u30b4\u30f3\u30dc\u30fc\u30eb",
+               "userPreferred": "Dragon Ball"
+            },
+            "volumes": 42,
+            "chapters": 520
+         },
+         "metadatas": {
+            "status": "ENDED",
+            "totalBookCount": "42",
+            "totalChaptersCount": "519"
+         },
+         "status": {
+            "anilist push": "[01/09/2022 13:52:24] : Not updating anilist : preserving volumes count : 0 VS LOCAL : 0",
+            "anilist get": "[01/09/2022 13:52:24] : Manga already in local"
+         }
+      },
+      {
+         "name": "Dr. Stone",
+         "komgaId": "09K4YTTBS7NZG",
+         "anilistInfo": {
+            "id": 98416,
+            "title": {
+               "romaji": "Dr. STONE",
+               "english": "Dr. STONE",
+               "native": "Dr.STONE",
+               "userPreferred": "Dr. STONE"
+            },
+            "volumes": 26,
+            "chapters": 232
+         },
+         "metadatas": {
+            "status": "ENDED",
+            "totalBookCount": "26",
+            "totalChaptersCount": "232"
+         },
+         "status": {
+            "anilist push": "[01/09/2022 13:52:24] : Not updating anilist : preserving volumes count : 18 VS LOCAL : 18",
+            "anilist get": "[01/09/2022 13:52:24] : Manga already in local"
+         }
+      },
+      {
+         "name": "Fairy Tail",
+         "komgaId": "09K4YTTE97S6X",
+         "anilistInfo": {
+            "id": 30598,
+            "title": {
+               "romaji": "FAIRY TAIL",
+               "english": "Fairy Tail",
+               "native": "FAIRY TAIL",
+               "userPreferred": "FAIRY TAIL"
+            },
+            "volumes": 63,
+            "chapters": 549
+         },
+         "metadatas": {
+            "status": "ENDED",
+            "totalBookCount": "63",
+            "totalChaptersCount": "549"
+         },
+         "status": {
+            "anilist push": "[01/09/2022 13:52:24] : Not updating anilist : preserving volumes count : 0 VS LOCAL : 0",
+            "anilist get": "[01/09/2022 13:52:24] : Manga already in local"
+         }
+      },
+      {
+         "name": "Naruto",
+         "komgaId": "09K4YTV357MRP",
+         "anilistInfo": {
+            "id": 30011,
+            "title": {
+               "romaji": "NARUTO",
+               "english": "Naruto",
+               "native": "NARUTO -\u30ca\u30eb\u30c8-",
+               "userPreferred": "NARUTO"
+            },
+            "volumes": 72,
+            "chapters": 700
+         },
+         "metadatas": {
+            "status": "ENDED",
+            "totalBookCount": "72",
+            "totalChaptersCount": "700"
+         },
+         "status": {
+            "anilist push": "[01/09/2022 13:52:24] : Not updating anilist : preserving volumes count : 1 VS LOCAL : 1",
+            "anilist get": "[01/09/2022 13:52:24] : Manga already in local"
+         }
+      },
+      {
+         "name": "One Piece",
+         "komgaId": "09K4YTVDD7MYD",
+         "anilistInfo": {
+            "id": 30013,
+            "title": {
+               "romaji": "ONE PIECE",
+               "english": "One Piece",
+               "native": "ONE PIECE",
+               "userPreferred": "ONE PIECE"
+            },
+            "volumes": null,
+            "chapters": null
+         },
+         "metadatas": {
+            "status": "ONGOING",
+            "totalBookCount": "101",
+            "totalChaptersCount": "1058"
+         },
+         "status": {
+            "anilist push": "[01/09/2022 13:46:16] : Not updating anilist : preserving volumes count : 19 VS LOCAL : 19",
+            "anilist get": "[01/09/2022 13:52:24] : Manga already in local"
+         }
+      },
+      {
+         "name": "Ranma 1/2",
+         "komgaId": "09K4YTWNH7KJS",
+         "anilistInfo": {
+            "id": 30023,
+            "title": {
+               "romaji": "Ranma 1/2",
+               "english": "Ranma \u00bd",
+               "native": "\u3089\u3093\u307e1/2",
+               "userPreferred": "Ranma 1/2"
+            },
+            "volumes": 38,
+            "chapters": 407
+         },
+         "metadatas": {
+            "status": "ENDED",
+            "totalBookCount": "38",
+            "totalChaptersCount": "407"
+         },
+         "status": {
+            "anilist push": "[01/09/2022 13:46:16] : Not updating anilist : preserving volumes count : 0 VS LOCAL : 0",
+            "anilist get": "[01/09/2022 13:46:16] : Manga already in local"
+         }
+      },
+      {
+         "name": "Saint Seiya",
+         "komgaId": "09K4YTWRD7SDW",
+         "anilistInfo": {
+            "id": 31045,
+            "title": {
+               "romaji": "Saint Seiya",
+               "english": "Knights of the Zodiac",
+               "native": "\u8056\u95d8\u58eb\u661f\u77e2",
+               "userPreferred": "Saint Seiya"
+            },
+            "volumes": 28,
+            "chapters": 110
+         },
+         "metadatas": {
+            "status": "ENDED",
+            "totalBookCount": "25",
+            "totalChaptersCount": "223"
+         },
+         "status": {
+            "anilist push": "[01/09/2022 13:46:16] : Not updating anilist : preserving volumes count : 0 VS LOCAL : 0",
+            "anilist get": "[01/09/2022 13:46:16] : Manga already in local"
+         }
+      },
+      {
+         "name": "Chainsaw Man",
+         "komgaId": "09K6QKEDN7PS3",
+         "anilistInfo": {
+            "id": 105778,
+            "title": {
+               "romaji": "Chainsaw Man",
+               "english": "Chainsaw Man",
+               "native": "\u30c1\u30a7\u30f3\u30bd\u30fc\u30de\u30f3",
+               "userPreferred": "Chainsaw Man"
+            },
+            "volumes": null,
+            "chapters": null
+         },
+         "metadatas": {
+            "status": "ONGOING",
+            "totalBookCount": "11",
+            "totalChaptersCount": "100"
+         },
+         "status": {
+            "anilist push": "[01/09/2022 13:46:29] : Not updating anilist : preserving volumes count : 11 VS LOCAL : 11",
+            "anilist get": "[01/09/2022 13:46:16] : Manga already in local"
+         }
+      },
+      {
+         "name": "Gunnm",
+         "komgaId": "09K6QKFVX7VEW",
+         "anilistInfo": {
+            "id": 30768,
+            "title": {
+               "romaji": "GUNNM",
+               "english": "Battle Angel Alita",
+               "native": "\u9283\u5922",
+               "userPreferred": "GUNNM"
+            },
+            "volumes": 9,
+            "chapters": 53
+         },
+         "metadatas": {
+            "status": "ENDED",
+            "totalBookCount": "9",
+            "totalChaptersCount": "53"
+         },
+         "status": {
+            "anilist push": "[01/09/2022 13:46:29] : Not updating anilist : preserving status : PAUSED",
+            "anilist get": "[01/09/2022 13:46:29] : Manga already in local"
+         }
+      },
+      {
+         "name": "Kaiju N\u00b08",
+         "komgaId": "09K6QKFWX7QJ2",
+         "anilistInfo": {
+            "id": 120760,
+            "title": {
+               "romaji": "Kaijuu 8-gou",
+               "english": "Kaiju No.8",
+               "native": "\u602a\u7363\uff18\u53f7",
+               "userPreferred": "Kaijuu 8-gou"
+            },
+            "volumes": null,
+            "chapters": null
+         },
+         "metadatas": {
+            "status": "ONGOING",
+            "totalBookCount": "7",
+            "totalChaptersCount": "68"
+         },
+         "status": {
+            "anilist push": "[01/09/2022 13:46:41] : Not updating anilist : preserving volumes count : 0 VS LOCAL : 0",
+            "anilist get": "[01/09/2022 13:46:29] : Manga already in local"
+         }
+      },
+      {
+         "name": "Solo Leveling",
+         "komgaId": "09K6QKGQD7HZA",
+         "anilistInfo": {
+            "id": 105398,
+            "title": {
+               "romaji": "Na Honjaman Level Up",
+               "english": "Solo Leveling",
+               "native": "\ub098 \ud63c\uc790\ub9cc \ub808\ubca8\uc5c5",
+               "userPreferred": "Na Honjaman Level Up"
+            },
+            "volumes": null,
+            "chapters": 180
+         },
+         "metadatas": {
+            "status": "ENDED",
+            "totalBookCount": "6",
+            "totalChaptersCount": "179"
+         },
+         "status": {
+            "anilist push": "[01/09/2022 13:46:41] : Not updating anilist : preserving volumes count : 0 VS LOCAL : 0",
+            "anilist get": "[01/09/2022 13:46:41] : Manga already in local"
+         }
+      },
+      {
+         "name": "Claymore",
+         "komgaId": "09K6WQ6RN7W3Y",
+         "anilistInfo": {
+            "id": 30583,
+            "title": {
+               "romaji": "CLAYMORE",
+               "english": "Claymore",
+               "native": "CLAYMORE",
+               "userPreferred": "CLAYMORE"
+            },
+            "volumes": 27,
+            "chapters": 159
+         },
+         "metadatas": {
+            "status": "ENDED",
+            "totalBookCount": "27",
+            "totalChaptersCount": "155"
+         },
+         "status": {
+            "anilist push": "[01/09/2022 13:46:41] : Not updating anilist : preserving volumes count : 0 VS LOCAL : 0",
+            "anilist get": "[01/09/2022 13:46:41] : Manga already in local"
+         }
+      },
+      {
+         "name": "Kenshin le vagabond",
+         "komgaId": "09K6WQ6WS7KR9",
+         "anilistInfo": {
+            "id": 30022,
+            "title": {
+               "romaji": "Rurouni Kenshin: Meiji Kenkaku Romantan",
+               "english": "Rurouni Kenshin",
+               "native": "\u308b\u308d\u3046\u306b\u5263\u5fc3 -\u660e\u6cbb\u5263\u5ba2\u6d6a\u6f2b\u8b5a-",
+               "userPreferred": "Rurouni Kenshin: Meiji Kenkaku Romantan"
+            },
+            "volumes": 28,
+            "chapters": 259
+         },
+         "metadatas": {
+            "status": "ENDED",
+            "totalBookCount": "28",
+            "totalChaptersCount": "255"
+         },
+         "status": {
+            "anilist push": "[01/09/2022 13:46:41] : Not updating anilist : preserving volumes count : 0 VS LOCAL : 0",
+            "anilist get": "[01/09/2022 13:46:41] : Manga already in local"
+         }
+      },
+      {
+         "name": "Dragon ball super",
+         "komgaId": "09KS9Q30N7G2S",
+         "anilistInfo": {
+            "id": 86508,
+            "title": {
+               "romaji": "Dragon Ball Super",
+               "english": "Dragon Ball Super",
+               "native": "\u30c9\u30e9\u30b4\u30f3\u30dc\u30fc\u30eb\u8d85",
+               "userPreferred": "Dragon Ball Super"
+            },
+            "volumes": null,
+            "chapters": null
+         },
+         "metadatas": {
+            "status": "ONGOING",
+            "totalBookCount": "18",
+            "totalChaptersCount": "87"
+         },
+         "status": {
+            "anilist push": "[01/09/2022 13:46:54] : Not updating anilist : preserving volumes count : 17 VS LOCAL : 17",
+            "anilist get": "[01/09/2022 13:46:41] : Manga already in local"
+         }
+      },
+      {
+         "name": "Yo-Kai Watch",
+         "komgaId": "09M35F6C57Y7P",
+         "anilistInfo": {
+            "id": 91171,
+            "title": {
+               "romaji": "Youkai Watch",
+               "english": "Yo-kai Watch",
+               "native": "\u5996\u602a\u30a6\u30a9\u30c3\u30c1",
+               "userPreferred": "Youkai Watch"
+            },
+            "volumes": null,
+            "chapters": null
+         },
+         "metadatas": {
+            "status": "ONGOING",
+            "totalBookCount": "20",
+            "totalChaptersCount": "194"
+         },
+         "status": {
+            "anilist push": "[01/09/2022 13:47:06] : Not updating anilist : preserving volumes count : 5 VS LOCAL : 5",
+            "anilist get": "[01/09/2022 13:46:54] : Manga already in local"
+         }
+      },
+      {
+         "name": "Fire Punch",
+         "komgaId": "09MQEQJ8N7HB8",
+         "anilistInfo": {
+            "id": 87170,
+            "title": {
+               "romaji": "Fire Punch",
+               "english": "Fire Punch",
+               "native": "\u30d5\u30a1\u30a4\u30a2\u30d1\u30f3\u30c1",
+               "userPreferred": "Fire Punch"
+            },
+            "volumes": 8,
+            "chapters": 83
+         },
+         "metadatas": {
+            "status": "ENDED",
+            "totalBookCount": "8",
+            "totalChaptersCount": "83"
+         },
+         "status": {
+            "anilist push": "[01/09/2022 13:47:06] : Not updating anilist : preserving volumes count : 8 VS LOCAL : 8",
+            "anilist get": "[01/09/2022 13:47:06] : Manga already in local"
+         }
+      },
+      {
+         "name": "Dragon ball SD",
+         "komgaId": "09P53J2JMEGM4",
+         "anilistInfo": {
+            "id": 53446,
+            "title": {
+               "romaji": "Dragon Ball SD",
+               "english": null,
+               "native": "\u30c9\u30e9\u30b4\u30f3\u30dc\u30fc\u30eb \u30a8\u30b9\u30c7\u30a3\u30fc",
+               "userPreferred": "Dragon Ball SD"
+            },
+            "volumes": null,
+            "chapters": null
+         },
+         "metadatas": {
+            "status": "ONGOING",
+            "totalBookCount": "8",
+            "totalChaptersCount": "58"
+         },
+         "status": {
+            "anilist push": "[01/09/2022 13:47:19] : Not updating anilist : preserving volumes count : 7 VS LOCAL : 7",
+            "anilist get": "[01/09/2022 13:47:06] : Manga already in local"
+         }
+      },
+      {
+         "name": "20th century boys",
+         "komgaId": "09PNBN718EH0R",
+         "anilistInfo": {
+            "id": 30003,
+            "title": {
+               "romaji": "20th Century Boys",
+               "english": "20th Century Boys",
+               "native": "20\u4e16\u7d00\u5c11\u5e74",
+               "userPreferred": "20th Century Boys"
+            },
+            "volumes": 22,
+            "chapters": 249
+         },
+         "metadatas": {
+            "status": "ENDED",
+            "totalBookCount": "22",
+            "totalChaptersCount": "249"
+         },
+         "status": {
+            "anilist push": "[01/09/2022 13:47:19] : Not updating anilist : preserving volumes count : 22 VS LOCAL : 22",
+            "anilist get": "[01/09/2022 13:47:19] : Manga already in local"
+         }
+      },
+      {
+         "name": "Platinum end",
+         "komgaId": "09PNBNBECEYJB",
+         "anilistInfo": {
+            "id": 86526,
+            "title": {
+               "romaji": "Platinum End",
+               "english": "Platinum End",
+               "native": "\u30d7\u30e9\u30c1\u30ca\u30a8\u30f3\u30c9",
+               "userPreferred": "Platinum End"
+            },
+            "volumes": 14,
+            "chapters": 58
+         },
+         "metadatas": {
+            "status": "ENDED",
+            "totalBookCount": "14",
+            "totalChaptersCount": "58"
+         },
+         "status": {
+            "anilist push": "[01/09/2022 13:47:19] : Not updating anilist : preserving volumes count : 3 VS LOCAL : 3",
+            "anilist get": "[01/09/2022 13:47:19] : Manga already in local"
+         }
+      },
+      {
+         "name": "Vinland Saga",
+         "komgaId": "09QD1PV863JZ5",
+         "anilistInfo": {
+            "id": 30642,
+            "title": {
+               "romaji": "Vinland Saga",
+               "english": "Vinland Saga",
+               "native": "\u30f4\u30a3\u30f3\u30e9\u30f3\u30c9\u30fb\u30b5\u30ac",
+               "userPreferred": "Vinland Saga"
+            },
+            "volumes": null,
+            "chapters": null
+         },
+         "metadatas": {
+            "status": "ONGOING",
+            "totalBookCount": "25",
+            "totalChaptersCount": "190"
+         },
+         "status": {
+            "anilist push": "[01/09/2022 13:47:31] : Not updating anilist : preserving volumes count : 0 VS LOCAL : 0",
+            "anilist get": "[01/09/2022 13:47:19] : Manga already in local"
+         }
+      },
+      {
+         "name": "L'Attaque des Titans",
+         "komgaId": "09K4YTSTN7MM9",
+         "anilistInfo": {
+            "id": 53390,
+            "title": {
+               "romaji": "Shingeki no Kyojin",
+               "english": "Attack on Titan",
+               "native": "\u9032\u6483\u306e\u5de8\u4eba",
+               "userPreferred": "Shingeki no Kyojin"
+            },
+            "volumes": 34,
+            "chapters": 141
+         },
+         "metadatas": {
+            "status": "ENDED",
+            "totalBookCount": "34",
+            "totalChaptersCount": "139"
+         },
+         "status": {
+            "anilist push": "[01/09/2022 13:52:24] : Not updating anilist : preserving volumes count : 2 VS LOCAL : 2",
+            "anilist get": "[01/09/2022 13:52:24] : Manga already in local"
          }
       }
    ],
