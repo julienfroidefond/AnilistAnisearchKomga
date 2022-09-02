@@ -176,7 +176,7 @@ def anilistAdd(anilistData, name, series, userMediaList, accessToken, md, datas)
             jsonRes = json.loads(res.text)
             if("data" in jsonRes.keys()):
                 printC("Successfully anilist synchronized " + name + " in status " + status + " with " + str(booksReadCount) + " volumes and " + str(progressChapters) + " chapters", "success")
-                logStatus(datas, name, "anilist push success", "synchronized  in status " + status + " with " + str(booksReadCount) + " volumes and " + str(progressChapters), False)
+                logStatus(datas, name, "anilist push success", "synchronized  in status " + status + " with " + str(booksReadCount) + " volumes and " + str(progressChapters) + " chapters", False)
             else:
                 printC("Error when uploading on anilist : "+jsonRes, "error")
                 logStatus(datas, name, "anilist push", "Error " + jsonRes, True)

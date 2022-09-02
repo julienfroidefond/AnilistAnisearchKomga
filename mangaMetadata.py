@@ -7,9 +7,11 @@ from anilist import *
 from anisearch import *
 
 resume = "\n\n-----RESUME-----\n"
+coucou = True
 
 langs = ["German", "English", "Spanish", "French", "Italian", "Japanese"]
 
+# Environment and variables
 try:
     ENV_URL = os.environ['KOMGAURL']
 except:
@@ -59,7 +61,6 @@ try:
 except:
     ENV_PROGRESS = False
 
-
 if (ENV_URL == "" and ENV_EMAIL == "" and ENV_PASS == "" and ENV_LANG == ""):
     try:
         from config import *
@@ -95,6 +96,7 @@ else:
     if(ENV_LANG == ""):
         resume += printC("Missing Anisearch language")
     sys.exit(1)
+# --- end Environment and variables
 
 if(anisearchlang not in langs):
     resume += printC("Invalid language, select one listed the README", 'error')
@@ -155,13 +157,6 @@ except:
 
 resume += printC("Series to do: " + str(expected))
 
-class failedtries():
-    def __init__(self, id, name):
-        self.id = id
-        self.name = name
-
-failed = []
-
 progressfilename = "mangas.progress"
 
 def addMangaProgress(seriesID):
@@ -188,8 +183,6 @@ if activateAnilistSync:
 
 forceUpdateFull = False
 
-failedfile = open("failed.txt", "w")
-
 # Have to do the page object before 
 p_context = sync_playwright()
 p = p_context.__enter__()
@@ -201,6 +194,7 @@ for series in json_string['content']:
     seriesID = series['id']
     name = series['metadata']['title']
 
+    # Get serie in datas.json
     currentSerie = None
     for serieData in datas["series"]:
         if(serieData["name"]==name):
@@ -252,11 +246,6 @@ for series in json_string['content']:
             resume += printC("----------------------------------------------------")
             resume += printC("Failed to update " + str(name) + ", trying again at the end", 'error')
             resume += printC("----------------------------------------------------")
-            fail = failedtries(seriesID, name)
-            failed.append(fail)
-            failedfile.write(str(seriesID))
-            failedfile.write(name)
-            time.sleep(10)
             continue
         jsonToPush = {
             "language": "fr",
@@ -296,10 +285,6 @@ for series in json_string['content']:
                 resume += printC(patch, 'error')
                 resume += printC(patch.text, 'error')
                 resume += printC("----------------------------------------------------")
-                failedfile.write(str(seriesID))
-                failedfile.write(name)
-                fail = failedtries(seriesID, name)
-                failed.append(fail)
             except:
                 pass
             
@@ -309,43 +294,3 @@ for series in json_string['content']:
 
 writeDatasJSON()
 print(resume)
-
-failedfile.close()
-
-# for f in failed:
-#     md = getMangaMetadata(f.name)
-#     if (md.isvalid == False):
-#         resume += printC("----------------------------------------------------")
-#         resume += printC("Failed again to update " + str(f.name) + ", not trying again")
-#         resume += printC("----------------------------------------------------")
-#         time.sleep(10)
-#         continue
-#     jsondata = """{
-#       "status": %s,
-#       "statusLock": true,
-#       "summary": "%s",
-#       "summaryLock": true,
-#       "publisher": "%s",
-#       "publisherLock": true,
-#       "genres": %s,
-#       "genresLock": true,
-#       "tags": %s,
-#       "tagsLock": true
-#     }""" % (md.status, md.summary.replace('\n', '\\n'), md.publisher, md.genres, md.tags)
-#     pushdata = jsondata.replace("\n", "").replace("{  \\\"status\\\": ", "{\\\"status\\\":").replace(",  \\\"statusLock\\\": ", ",\\\"statusLock\\\":").replace(",  \\\"summary\\\": ", ",\\\"summary\\\":").replace(",  \\\"summaryLock\\\": ", ",\\\"summaryLock\\\":").replace("\n", "").replace("\r", "")
-#     resume += printC(pushdata)
-#     headers = {'Content-Type': 'application/json', 'accept': '*/*'}
-#     patch = requests.patch(komgaurl + "/api/v1/series/" + seriesID + "/metadata", data=str.encode(pushdata), auth = (komgaemail, komgapassword), headers=headers)
-#     if(patch.status_code == 204):
-#         resume += printC("++++++++++++++++++++++++++++++++++++++++++++++++++++")
-#         resume += printC("Successfully updated " + str(f.name), 'success')
-#         resume += printC("++++++++++++++++++++++++++++++++++++++++++++++++++++")
-#         addMangaProgress(seriesID)
-#         time.sleep(10)
-#     else:
-#         resume += printC("----------------------------------------------------")
-#         resume += printC("Failed again to update " + str(f.name) + ", not trying again")
-#         resume += printC("----------------------------------------------------")
-#         addMangaProgress(seriesID)
-#         time.sleep(10)
-#         continue

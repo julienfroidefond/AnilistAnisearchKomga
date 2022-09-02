@@ -1,3 +1,4 @@
+import sys
 from datetime import datetime
 
 class bcolors:
@@ -11,24 +12,33 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+onlyResume = False
+if(len(sys.argv)>1):
+    if(sys.argv[1] == "onlyResume"):
+        onlyResume=True
 
 def printC(msg, type = 'info'):
     now = datetime.now()
     dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
     resume=""
+    printMsg = ""
     if(type == "error"):
-        resume += bcolors.FAIL+ dt_string + " - [ERROR] : "+msg+bcolors.ENDC+"\n"
-        print(bcolors.FAIL+ dt_string + " - [ERROR] : "+msg+bcolors.ENDC)
+        printMsg = bcolors.FAIL+ dt_string + " - [ERROR] : "+msg+bcolors.ENDC
+        resume += printMsg + "\n"
     elif(type=="success"):
-        resume += bcolors.OKGREEN+ dt_string + " - [SUCCESS] : "+msg+bcolors.ENDC+"\n"
-        print(bcolors.OKGREEN+ dt_string + " - [SUCCESS] : "+msg+bcolors.ENDC)
+        printMsg = bcolors.OKGREEN+ dt_string + " - [SUCCESS] : "+msg+bcolors.ENDC
+        resume += printMsg+"\n"
     elif(type=="debug"):
-        print(bcolors.WARNING+ dt_string + " - [DEBUG] : "+msg+bcolors.ENDC)
+        printMsg = bcolors.WARNING+ dt_string + " - [DEBUG] : "+msg+bcolors.ENDC
     elif(type=="warn"):
-        resume += bcolors.WARNING+ dt_string + " - [WARN] : "+msg+bcolors.ENDC+"\n"
-        print(bcolors.WARNING+ dt_string + " - [WARN] : "+msg+bcolors.ENDC)
+        printMsg = bcolors.WARNING+ dt_string + " - [WARN] : "+msg+bcolors.ENDC
+        resume += printMsg + "\n"
     else:
-        print(bcolors.OKBLUE + dt_string + " - [INFO] : "+msg+bcolors.ENDC)
+        printMsg=bcolors.OKBLUE + dt_string + " - [INFO] : "+msg+bcolors.ENDC
+
+    if(onlyResume is False):
+        print(printMsg)
+
     return resume
 
 def logStatus(datas, name, type, status, oneTime):
