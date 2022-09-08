@@ -1,13 +1,10 @@
-import requests, json, webbrowser, math
+import requests, json, webbrowser, math, re
 
-from utils import printC, logStatus
+from utils import printC, logStatus, getSerieByName
 
-def anilistGet(name, seriesID, datas):
-    printC("get and write JSON anilist for "+name)
-    currentSerie = None
-    for serieData in datas["series"]:
-        if(serieData["name"]==name):
-            currentSerie = serieData
+def anilistGet(name, seriesID, datas, forceUpdateFull):
+    printC("get datas JSON anilist for "+name)
+    currentSerie = getSerieByName(datas, name)
     if currentSerie is None:
         datas["series"].append({"name":name, "komgaId":seriesID})
 
@@ -16,7 +13,7 @@ def anilistGet(name, seriesID, datas):
             currentSerie = serieData
             
     try:
-        if("anilistInfo" not in currentSerie.keys()):
+        if("anilistInfo" not in currentSerie.keys() or forceUpdateFull):
             query = '''
             query ($search: String) {
                 Page {
@@ -30,6 +27,22 @@ def anilistGet(name, seriesID, datas):
                         }
                         volumes
                         chapters
+                        status
+                        tags {
+                            name
+                        }
+                        description
+                        genres
+                        endDate {
+                            year
+                            month
+                            day
+                        }
+                        startDate {
+                            year
+                            month
+                            day
+                        }
                     }
                 }
             }
@@ -56,6 +69,7 @@ def anilistGet(name, seriesID, datas):
             else:
                 printC(resData,"debug")
         else:
+            printC("Manga already in local")
             logStatus(datas, name, "anilist get", "Manga already in local", True)
             return currentSerie["anilistInfo"]
 
@@ -110,12 +124,11 @@ def getUserCurrentLists(username, datas):
     resData = json.loads(response.text)
     return resData['data']['Page']['mediaList']
  
-def anilistAdd(anilistData, name, series, userMediaList, accessToken, md, datas):
+def anilistAdd(anilistId, name, series, userMediaList, accessToken, md, datas):
     booksReadCount = series['booksReadCount']
     totalBookCount = series['metadata']['totalBookCount']
     totalChaptersCount = md["totalChaptersCount"]
 
-    anilistId=anilistData["id"]
     if anilistId != 0:
         currentUserMedia = None
         for userMedia in userMediaList:
@@ -136,7 +149,8 @@ def anilistAdd(anilistData, name, series, userMediaList, accessToken, md, datas)
                 progressChapters = int(totalChaptersCount)
             else:
                 chapByVol = int(totalBookCount) / int(totalChaptersCount)
-                progressChapters= math.ceil(currentUserMedia['progressVolumes'] / chapByVol)
+                if currentUserMedia is not None:
+                    progressChapters= math.ceil(currentUserMedia['progressVolumes'] / chapByVol)
 
         hasToUpdate = True
         if(currentUserMedia):
@@ -180,3 +194,45 @@ def anilistAdd(anilistData, name, series, userMediaList, accessToken, md, datas)
             else:
                 printC("Error when uploading on anilist : "+jsonRes, "error")
                 logStatus(datas, name, "anilist push", "Error " + jsonRes, True)
+
+CLEANR = re.compile('<.*?>') 
+def cleanhtml(raw_html):
+    cleantext = re.sub(CLEANR, '', raw_html)
+    return cleantext
+
+def mapAnilistToKomga(anilistData):
+    tags=[]
+    if("tags"in anilistData.keys()):
+        for tag in anilistData["tags"]:
+            tags.append(tag['name'])
+        
+        status = anilistData["status"]
+        casestatus="ONGOING"
+        if(status != ""):
+            if(status == "RELEASING"):
+                casestatus = "ONGOING"
+            elif(status == "NOT_YET_RELEASED"):
+                casestatus = "ONGOING"
+            elif(status == "CANCELLED"):
+                casestatus = "ABANDONED"
+            elif(status == "FINISHED"):
+                casestatus = "ENDED"
+       
+        cleanDesc = cleanhtml(anilistData["description"])
+        
+        return {
+            "language": "fr",
+            "languageLock": True,
+            "status": casestatus,
+            "statusLock": True,
+            "summary": cleanDesc,
+            "summaryLock": True,
+            "genres": anilistData["genres"],
+            "genresLock": True,
+            "tags": tags,
+            "tagsLock": True,
+            "totalBookCount": anilistData["volumes"],
+            "totalBookCountLock": True
+        }
+    else:
+        return {}

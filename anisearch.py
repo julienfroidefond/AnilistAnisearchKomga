@@ -315,3 +315,10 @@ def getMangaMetadata(query, anisearchlang, page):
 
     data.isvalid = True
     return data
+
+def mapAniSearchToKomga(md, base = {}):
+    base['publisher'] = md.publisher
+    base['publisherLock'] = True
+    base['totalBookCount'] = md.totalBookCount
+    base['totalBookCountLock'] = True
+    return base
