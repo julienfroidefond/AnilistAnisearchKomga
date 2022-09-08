@@ -41,8 +41,7 @@ def printC(msg, type = 'info'):
 
     return resume
 
-def logStatus(datas, name, type, status, oneTime):
-    currentSerie = getSerieByName(datas, name)
+def logStatus(currentSerie, type, status, oneTime):
     now = datetime.now()
     dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
     states = {}
@@ -53,9 +52,22 @@ def logStatus(datas, name, type, status, oneTime):
     currentSerie["status"] = states
 
 def getSerieByName(datas, name):
+    serie = None
     for serieData in datas["series"]:
         if(serieData["name"] == name):
-            return serieData
+            serie = serieData
+    if serie is None:
+        s={"name": name}
+        datas["series"].append(s)
+        return s
+    else:
+        return serie
+
+def setSerieByName(datas, name, serie):
+    serie = None
+    for serieData in datas["series"]:
+        if(serieData["name"] == name):
+            serieData["name"] = serie
 
 def writeDatasJSON(datas):
     with open('datas.json', 'w') as outfile:
@@ -117,14 +129,6 @@ def getEnvVars():
         ENV_ANILISTSECRET = os.environ['ANILISTSECRET']
     except:
         ENV_ANILISTSECRET = ""
-    try:
-        ENV_PROGRESS = os.environ['KEEPPROGRESS']
-        if(ENV_PROGRESS.lower() == "true"):
-            ENV_PROGRESS = True
-        else:
-            ENV_PROGRESS = False
-    except:
-        ENV_PROGRESS = False
 
     if (ENV_URL == "" and ENV_EMAIL == "" and ENV_PASS == "" and ENV_LANG == ""):
         printC("Failed to find config.py, does it exist?", 'error')
@@ -134,7 +138,6 @@ def getEnvVars():
         komgaemail = ENV_EMAIL
         komgapassword = ENV_PASS
         anisearchlang = ENV_LANG
-        keepProgress = ENV_PROGRESS
         mangas = []
         if(ENV_MANGAS != "NONE"):
             for manga in ENV_MANGAS.split(","):
@@ -176,4 +179,39 @@ def getEnvVars():
     anilistUsername = ENV_ANILISTUSERNAME
 
     
-    return komgaurl, komgaemail, komgapassword, anisearchlang, keepProgress, mangas, activateAnilistSync, anilistClientId, anilistSecret, anilistUsername, libraries
+    return komgaurl, komgaemail, komgapassword, anisearchlang, mangas, activateAnilistSync, anilistClientId, anilistSecret, anilistUsername, libraries
+
+def isInLib(libraries, series, json_lib):
+    if(len(libraries) > 0):
+        libraryId = series['libraryId']
+        currentLib = ""
+        for libKom in json_lib:
+            if libKom['id'] == libraryId:
+                currentLib = libKom['name']
+        if(currentLib not in libraries):
+            return False
+    return True
+    
+
+def getSkipStatuses(series, name, mangas, forceUpdateFull, currentSerie):
+    skipUpdate = False
+    skipSync = False
+    isFinished = False
+    if (series['metadata']['statusLock'] == True and series['metadata']['status'] == 'ENDED'):
+        isFinished = True
+    if currentSerie is not None :
+        if "metadatas" not in currentSerie :
+            printC("No metadatas in datas; we force update for " + name, "error")
+            isFinished = False
+    else:
+        currentSerie={}
+    if(len(mangas) > 0):
+        if(series['name'] not in mangas):
+            skipUpdate = True
+            skipSync = True
+
+    if (isFinished == True and forceUpdateFull is False):
+        printC("Ignoring "+str(name)+" : series terminated and already synchronized", 'warn')
+        skipUpdate = True
+
+    return skipUpdate, skipSync
