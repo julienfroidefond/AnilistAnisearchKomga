@@ -1,4 +1,8 @@
-# Anisearch metadata scraper for Komga
+# AnilIst / Anisearch metadata scraper for Komga
+
+2 functions : 
+- Get matadata from anilist; complete with anisearch
+- Synchronize anilist personal lists
 
 ## About this fork
 
@@ -15,16 +19,18 @@ I have updated and done some private work :
 - info in print has been reviewed : colors and typings :)
 - review code about json to string
 - Anilist synchronizer !
+- refacto and split by files
+- you can put an extra parameter : onlyResume for cron job purpose (`python mangaMetadata.py OnlyResume`) It will just print warn/success/errors
 
 ## About Anilist sync
 
 Go to https://anilist.co/settings/developer and click "Create New Api v2 client", then enter your client name and redirect URI : https://anilist.co/api/v2/oauth/pin. After clicking Save you'll receive your client ID and secret.
 You have to define in environment this variables :
 
-- ACTIVATEANILIST must be "true"
-- ANILISTID
-- ANILISTSECRET
-- ANILISTUSERNAME
+- `ACTIVATEANILIST="true"`
+- `ANILISTID="1234"`
+- `ANILISTSECRET="abcdefgh"`
+- `ANILISTUSERNAME="myusername"`
 
 The script will ask you the code for generating token (just follow the cli).
 The token is registered in the datas.json file. Just delete it in the file to reset.
@@ -66,12 +72,19 @@ I tried to test the languages as best as I could, but if I missed something plea
 
 ## Parsed Attributes
 
+From Anilist :
+
 - [x] Status
 - [x] Summary
-- [x] Publisher
+- [ ] Publisher
 - [ ] Age rating (not supported for now, does Anisearch even have this?)
 - [x] Genres
 - [x] Tags
+
+From Anisearch :
+
+- [x] Books total count
+
 
 ## Getting started (Native)
 
@@ -102,3 +115,4 @@ Alternatively, you could run the docker-compose to get a running container
 ### Additional Environment Variables
 
 - `MANGAS="Manga1,Manga2"` - This can be used to give a comma seperated list of mangas which are supposed to be updated. If it is left blank, every manga will be updated.
+- `LIBS="Lib1,Lib2"` - This can be used to filter a library Komga
