@@ -7,7 +7,4 @@ services:
       - KOMGAURL=https://komga.com
       - KOMGAEMAIL=adminemail@komga.com
       - KOMGAPASSWORD=12345
-      - LANGUAGE=German
-      - KEEPPROGRESS=True
-    volumes:
-      - ./mangas.progress:/app/mangas.progress
+      - LANGUAGE=French
