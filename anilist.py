@@ -117,11 +117,15 @@ def getUserCurrentLists(username):
     resData = json.loads(response.text)
     return resData['data']['Page']['mediaList']
  
-def anilistAdd(anilistId, name, series, userMediaList, accessToken, currentSerie):
+def anilistAdd(userMediaList, accessToken, currentSerie):
+
+    anilistId = currentSerie["anilistInfo"]["id"]
+    name = currentSerie["name"]
     md = currentSerie["metadatas"]
-    booksReadCount = series['booksReadCount']
-    totalBookCount = series['metadata']['totalBookCount']
-    totalChaptersCount = md["totalChaptersCount"]
+
+    booksReadCount = int(md['booksReadCount'])
+    totalBookCount = int(md['totalBookCount'])
+    totalChaptersCount = int(md["totalChaptersCount"])
 
     if anilistId != 0:
         currentUserMedia = None

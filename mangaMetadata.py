@@ -6,27 +6,19 @@ from utils import *
 from anilist import *
 from anisearch import *
 
-resume = "\n\n-----RESUME-----\n"
-
-def printR(msg, type = 'info'):
-    global resume
-    resume += printC(msg, type)
-
 komgaurl, komgaemail, komgapassword, anisearchlang, mangas, activateAnilistSync, anilistClientId, anilistSecret, anilistUsername, libraries = getEnvVars()
 
-printR("Using user " + komgaemail)
-printR("Using server " + komgaurl)
+printC("Using user " + komgaemail)
+printC("Using server " + komgaurl)
 if activateAnilistSync:
-    printR("Using anilist client id " + anilistClientId)
-    printR("Using anilist secret id " + anilistSecret)
-    printR("Using anilist user " + anilistUsername)
+    printC("Using anilist client id " + anilistClientId)
+    printC("Using anilist secret id " + anilistSecret)
+    printC("Using anilist user " + anilistUsername)
 
 datas = getDatasFromFile()
 
 def handler(signum, frame):
-    global resume
-    printR("Quittind app by SIGINT; writing")
-    print(resume)
+    printC("Quittind app by SIGINT; writing")
     writeDatasJSON(datas)
     sys.exit(1)
 signal.signal(signal.SIGINT, handler)
@@ -40,10 +32,10 @@ json_string = json.loads(x.text)
 try:
     expected = json_string['numberOfElements']
 except:
-    printR("Failed to get list of mangas, are the login infos correct?", 'error')
+    printC("Failed to get list of mangas, are the login infos correct?", 'error')
     sys.exit(1)
 
-printR("Series to do: " + str(expected))
+printC("Series to do: " + str(expected))
 
 # --------- Getting anilist lists of the user
 userMediaList = []
@@ -72,14 +64,14 @@ for series in json_string['content']:
         skipUpdate, skipSync = getSkipStatuses(series, name, mangas, forceUpdateFull, currentSerie)
 
         seriesnum += 1
-        printR("Number: " + str(seriesnum) + "/" + str(expected))
+        printC("Number: " + str(seriesnum) + "/" + str(expected))
 
         # --------- get from anilist
         anilistData = anilistGet(currentSerie, forceUpdateFull)
         currentSerie["anilistInfo"] = anilistData
         
         if(skipUpdate is False):
-            printR("Updating: " + str(name)) 
+            printC("Updating: " + str(name)) 
             
             # --------- map anilist <> Komga
             jsonToPush = mapAnilistToKomga(anilistData)
@@ -87,16 +79,16 @@ for series in json_string['content']:
             # --------- Get from anisearch
             md = getMangaMetadata(name, anisearchlang, page)
             if(md.isvalid == False):
-                printR("----------------------------------------------------")
-                printR("Failed to update from anisearch " + str(name), 'error')
-                printR("----------------------------------------------------")
+                printC("----------------------------------------------------")
+                printC("Failed to update from anisearch " + str(name), 'error')
+                printC("----------------------------------------------------")
                 continue
             jsonToPush = mapAniSearchToKomga(md, jsonToPush) 
             
             currentSerie["metadatas"] = {
                 "status": md.status,
                 "totalBookCount": md.totalBookCount,
-                "totalChaptersCount": md.totalChaptersCount,
+                "totalChaptersCount": md.totalChaptersCount
             }
 
             # --------- Update Komga 
@@ -104,25 +96,26 @@ for series in json_string['content']:
             headers = {'Content-Type': 'application/json', 'accept': '*/*'}
             patch = requests.patch(komgaurl + "/api/v1/series/" + seriesID + "/metadata", data=str.encode(pushdata), auth = (komgaemail, komgapassword), headers=headers)
             if(patch.status_code == 204):
-                printR("----------------------------------------------------")
-                printR("Successfully updated " + str(name), 'success')
-                printR("----------------------------------------------------")
+                printC("----------------------------------------------------")
+                printC("Successfully updated " + str(name), 'success')
+                printC("----------------------------------------------------")
                 time.sleep(10)
             else:
                 try:
-                    printR("----------------------------------------------------")
-                    printR(pushdata, "debug")
-                    printR("Failed to update " + str(name), 'error')
-                    printR(patch, 'error')
-                    printR(patch.text, 'error')
-                    printR("----------------------------------------------------")
+                    printC("----------------------------------------------------")
+                    printC(pushdata, "debug")
+                    printC("Failed to update " + str(name), 'error')
+                    printC(patch, 'error')
+                    printC(patch.text, 'error')
+                    printC("----------------------------------------------------")
                 except:
                     pass
-        
+
+        # --------- Actualize nb book read
+        currentSerie["metadatas"]["booksReadCount"] = str(series['booksReadCount'])
         # --------- Save to anilist user lists states
-        if currentSerie is not None :
-            if activateAnilistSync and skipSync is False and "metadatas" in currentSerie.keys():
-                anilistAdd(anilistData["id"], name, series, userMediaList, accessToken, currentSerie)
+        if currentSerie is not None:
+            if activateAnilistSync and skipSync is False:
+                anilistAdd(userMediaList, accessToken, currentSerie)
 
 writeDatasJSON(datas)
-print(resume)

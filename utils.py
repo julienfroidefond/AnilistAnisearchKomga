@@ -24,22 +24,23 @@ def printC(msg, type = 'info'):
     printMsg = ""
     if(type == "error"):
         printMsg = bcolors.FAIL+ dt_string + " - [ERROR] : "+msg+bcolors.ENDC
-        resume += printMsg + "\n"
+        resume = printMsg
     elif(type=="success"):
         printMsg = bcolors.OKGREEN+ dt_string + " - [SUCCESS] : "+msg+bcolors.ENDC
-        resume += printMsg+"\n"
+        resume = printMsg
     elif(type=="debug"):
         printMsg = bcolors.WARNING+ dt_string + " - [DEBUG] : "+msg+bcolors.ENDC
     elif(type=="warn"):
         printMsg = bcolors.WARNING+ dt_string + " - [WARN] : "+msg+bcolors.ENDC
-        resume += printMsg + "\n"
+        resume = printMsg
     else:
         printMsg=bcolors.OKBLUE + dt_string + " - [INFO] : "+msg+bcolors.ENDC
 
     if(onlyResume is False):
         print(printMsg)
-
-    return resume
+    else:
+        if(resume != ""):
+            print(resume)
 
 def logStatus(currentSerie, type, status, oneTime):
     now = datetime.now()
