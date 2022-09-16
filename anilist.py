@@ -5,7 +5,7 @@ from utils import printC, logStatus, getSerieByName
 def anilistGet(currentSerie, forceUpdateFull):
 
     name = currentSerie["name"]
-    printC("get datas JSON anilist for "+name)
+    printC("[ANILIST] : get datas JSON anilist for "+name)
     try:
         if("anilistInfo" not in currentSerie.keys() or forceUpdateFull):
             query = '''
@@ -45,32 +45,32 @@ def anilistGet(currentSerie, forceUpdateFull):
                 'search': name
             }
             url = 'https://graphql.anilist.co'
-            printC("Getting info from anilist")
+            printC("[ANILIST] : Getting info from anilist")
             response = requests.post(url, json={'query': query, 'variables': variables})
             resData = json.loads(response.text)
             if "data" in resData.keys():
                 if(len(resData["data"]["Page"]["media"]) > 0):
-                    printC("Successfully get from anilist for " + name, 'success')
+                    printC("[ANILIST] : Successfully get from anilist for " + name, 'success')
                     logStatus(currentSerie, "anilist get", "Manga found all ok", True)
                     return resData["data"]["Page"]["media"][0]
                 else:
                     # printC(json.dumps(resData,skipkeys = True),'debug')
                     # printC(json.dumps(query,skipkeys = True),'debug')
                     # printC(json.dumps(variables,skipkeys = True),'debug')
-                    printC("Manga not found on anilist : "+name, "error")
+                    printC("[ANILIST] : Manga not found on anilist : "+name, "error")
                     logStatus(currentSerie, "anilist get", "Manga not found on anilist", True)
                     return {}
             else:
                 printC(resData,"debug")
                 return {}
         else:
-            printC("Manga already in local")
+            printC("[ANILIST] : Manga already in local")
             logStatus(currentSerie, "anilist get", "Manga already in local", True)
             return currentSerie["anilistInfo"]
 
     except Exception as e:
         printC(str(e), "debug")
-        printC("Failed to get from anilist", 'error')
+        printC("[ANILIST] : Failed to get from anilist", 'error')
         return {}
 
 def aniListConnect(anilistAccessToken, anilistClientId, anilistSecret):
@@ -89,9 +89,9 @@ def aniListConnect(anilistAccessToken, anilistClientId, anilistSecret):
             'redirect_uri': 'https://anilist.co/api/v2/oauth/pin',
             'code': code
         })
-        print(json.loads(response.text))
+        # print(json.loads(response.text))
         accessToken = json.loads(response.text)['access_token']
-        printC("Successfully get a token from anilist for user", "success")
+        printC("[ANILIST] : Successfully get a token from anilist for user", "success")
     else:
         accessToken = anilistAccessToken
     return accessToken
@@ -100,10 +100,11 @@ def getUserCurrentLists(username):
     query = '''
     query ($userName: String) {
         Page {
-            mediaList(userName: $userName) {
-            mediaId
-            status
-            progressVolumes
+            mediaList(userName: $userName, type: MANGA) {
+                mediaId
+                status
+                progressVolumes
+                progress
             }
         }
     }
@@ -112,7 +113,7 @@ def getUserCurrentLists(username):
         'userName': username
     }
     url = 'https://graphql.anilist.co'
-    printC("Getting user's lists from anilist for " + username)
+    printC("[ANILIST] : Getting user's lists from anilist for " + username)
     response = requests.post(url, json={'query': query, 'variables': variables})
     resData = json.loads(response.text)
     return resData['data']['Page']['mediaList']
@@ -144,21 +145,21 @@ def anilistAdd(userMediaList, accessToken, currentSerie):
         progressChapters=0
         if(totalChaptersCount is not None and totalBookCount is not None):
             if(status == "COMPLETED"):
-                progressChapters = int(totalChaptersCount)
+                progressChapters = totalChaptersCount
             else:
-                chapByVol = int(totalBookCount) / int(totalChaptersCount)
+                chapByVol = totalBookCount / totalChaptersCount
                 if currentUserMedia is not None:
                     progressChapters= math.ceil(currentUserMedia['progressVolumes'] / chapByVol)
 
         hasToUpdate = True
         if(currentUserMedia):
             if(currentUserMedia['status'] != "PLANNING" and currentUserMedia['status'] != "COMPLETED" and currentUserMedia['status'] != "CURRENT") :
-                printC("Not updating anilist : preserving status : " + currentUserMedia['status'])
+                printC("[ANILIST] : Not updating anilist : preserving status : " + currentUserMedia['status'])
                 logStatus(currentSerie, "anilist push", "Not updating anilist : preserving status : " + currentUserMedia['status'], True)
                 hasToUpdate = False
-            if(currentUserMedia['status'] == status and booksReadCount <= currentUserMedia['progressVolumes']):
-                printC("Not updating anilist : preserving volumes count : " + str(currentUserMedia['progressVolumes']) + " VS LOCAL : " +str(booksReadCount))
-                logStatus(currentSerie, "anilist push", "Not updating anilist : preserving volumes count : " + str(currentUserMedia['progressVolumes']) + " VS LOCAL : " +str(booksReadCount), True)
+            if(currentUserMedia['status'] == status and booksReadCount <= currentUserMedia['progressVolumes'] and progressChapters <= currentUserMedia['progress']):
+                printC("[ANILIST] : Not updating anilist : preserving volumes count : " + str(currentUserMedia['progressVolumes']) + " VS LOCAL : " +str(booksReadCount))
+                logStatus(currentSerie, "anilist push", "Not updating anilist : preserving volumes count : " + str(currentUserMedia['progress']) + "/" + str(currentUserMedia['progressVolumes']) + " VS LOCAL : " + str(progressChapters) + "/" +str(booksReadCount), True)
                 hasToUpdate = False
 
 
@@ -187,10 +188,10 @@ def anilistAdd(userMediaList, accessToken, currentSerie):
             })
             jsonRes = json.loads(res.text)
             if("data" in jsonRes.keys()):
-                printC("Successfully anilist synchronized " + name + " in status " + status + " with " + str(booksReadCount) + " volumes and " + str(progressChapters) + " chapters", "success")
+                printC("[ANILIST] : Successfully anilist synchronized " + name + " in status " + status + " with " + str(booksReadCount) + " volumes and " + str(progressChapters) + " chapters", "success")
                 logStatus(currentSerie, "anilist push success", "synchronized  in status " + status + " with " + str(booksReadCount) + " volumes and " + str(progressChapters) + " chapters", False)
             else:
-                printC("Error when uploading on anilist : "+jsonRes, "error")
+                printC("[ANILIST] : Error when uploading on anilist : "+jsonRes, "error")
                 logStatus(currentSerie, "anilist push", "Error " + jsonRes, True)
 
 CLEANR = re.compile('<.*?>') 

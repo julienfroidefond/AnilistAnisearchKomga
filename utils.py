@@ -132,7 +132,7 @@ def getEnvVars():
         ENV_ANILISTSECRET = ""
 
     if (ENV_URL == "" and ENV_EMAIL == "" and ENV_PASS == "" and ENV_LANG == ""):
-        printC("Failed to find config.py, does it exist?", 'error')
+        printC("[ENV] : Failed to find config.py, does it exist?", 'error')
         sys.exit(1)
     elif (ENV_URL != "" and ENV_EMAIL != "" and ENV_PASS != "" and ENV_LANG != ""):
         komgaurl = ENV_URL
@@ -152,28 +152,28 @@ def getEnvVars():
                     lib = lib[1:]
                 libraries.append(lib)
     else:
-        printC("Looks like either you are trying to set the configuration using environment variables or you are using docker.")
+        printC("[ENV] : Looks like either you are trying to set the configuration using environment variables or you are using docker.")
         if(ENV_URL == ""):
-            printC("Missing Komga URL")
+            printC("[ENV] : Missing Komga URL")
         if(ENV_EMAIL == ""):
-            printC("Missing Komga Email")
+            printC("[ENV] : Missing Komga Email")
         if(ENV_PASS == ""):
-            printC("Missing Komga Password")
+            printC("[ENV] : Missing Komga Password")
         if(ENV_LANG == ""):
-            printC("Missing Anisearch language")
+            printC("[ENV] : Missing Anisearch language")
         sys.exit(1)
     # --- end Environment and variables
 
     if(anisearchlang not in langs):
-        printC("Invalid language, select one listed the README", 'error')
+        printC("[ENV] : Invalid language, select one listed the README", 'error')
         sys.exit(1)
 
     activateAnilistSync = False
     if(ENV_ACTIVATEANILIST == True and ENV_ANILISTID != "" and ENV_ANILISTSECRET != '' and ENV_ANILISTUSERNAME != ''):
         activateAnilistSync=True
-        printC("Synchronization Anilist is activated")
+        printC("[ENV] : Synchronization Anilist is activated")
     else:
-        printC("No synchronization Anilist. Please check environment variables.", "warn")
+        printC("[ENV] : No synchronization Anilist. Please check environment variables.", "warn")
 
     anilistClientId = ENV_ANILISTID
     anilistSecret = ENV_ANILISTSECRET
@@ -202,7 +202,7 @@ def getSkipStatuses(series, name, mangas, forceUpdateFull, currentSerie):
         isFinished = True
     if currentSerie is not None :
         if "metadatas" not in currentSerie :
-            printC("No metadatas in datas; we force update for " + name, "error")
+            printC("[SKIP] : No metadatas in datas; we force update for " + name, "error")
             isFinished = False
     else:
         currentSerie={}
@@ -212,7 +212,7 @@ def getSkipStatuses(series, name, mangas, forceUpdateFull, currentSerie):
             skipSync = True
 
     if (isFinished == True and forceUpdateFull is False):
-        printC("Ignoring "+str(name)+" : series terminated and already synchronized", 'warn')
+        printC("[SKIP] : Ignoring "+str(name)+" : series terminated and already synchronized", 'warn')
         skipUpdate = True
 
     return skipUpdate, skipSync

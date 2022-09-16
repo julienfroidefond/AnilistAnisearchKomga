@@ -66,11 +66,11 @@ def getURLfromSearch(query, anisearchlang, page):
     status_code = resp.status
 
     if("quick-search=" not in new_url):
-        printC("Got instant redirect, correct series found")
+        printC("[ANISEARCH] : Got instant redirect, correct series found")
         return new_url
 
     if(status_code != 200):
-        printC("Status code was " + str(status_code) + ", so skipping...", 'error')
+        printC("[ANISEARCH] : Status code was " + str(status_code) + ", so skipping...", 'error')
         if(status_code == 403):
             printC(content)
         return ""
@@ -87,7 +87,7 @@ def getURLfromSearch(query, anisearchlang, page):
         return ""
 
 def getMangaMetadata(query, anisearchlang, page):
-    printC("Getting metadata for " + str(query))
+    printC("[ANISEARCH] : Getting metadata for " + str(query))
     status = ""         #done
     summary = ""        #done
     publisher = ""      #done
@@ -99,7 +99,7 @@ def getMangaMetadata(query, anisearchlang, page):
 
     URL = getURLfromSearch(query, anisearchlang, page)
     if(URL == ""):
-        printC("No result found or error occured", 'error')
+        printC("[ANISEARCH] : No result found or error occured", 'error')
         return data
 
     time.sleep(1)
@@ -109,7 +109,7 @@ def getMangaMetadata(query, anisearchlang, page):
     status_code = resp.status
 
     if(status_code != 200):
-        printC("return code was " + str(status_code) + ", skipping...", 'error')
+        printC("[ANISEARCH] : return code was " + str(status_code) + ", skipping...", 'error')
         return data
     try:
         parser = etree.HTMLParser()
@@ -134,7 +134,7 @@ def getMangaMetadata(query, anisearchlang, page):
                 else:
                     statusIndex = 2
                     publisherIndex = 5
-                    #printC("Found correct Language, index is " + str(rightIndex))
+                    #printC("[ANISEARCH] : Found correct Language, index is " + str(rightIndex))
                 langRunning = False
                 break
             index += 1
@@ -145,7 +145,7 @@ def getMangaMetadata(query, anisearchlang, page):
             break
 
     if(rightIndex == -1):
-        printC("Failed to find set language, using first language as fallback", 'error')
+        printC("[ANISEARCH] : Failed to find set language, using first language as fallback", 'error')
         rightIndex = 1
 
     rightIndex = str(rightIndex)
@@ -160,7 +160,7 @@ def getMangaMetadata(query, anisearchlang, page):
             status = ''.join(status).split(": ")[1]
         except Exception as e:
             printC(str(e), 'debug')
-            printC("Failed to get status", 'error')
+            printC("[ANISEARCH] : Failed to get status", 'error')
 
     if(status != ""):
         if(status in runningLang):
@@ -179,14 +179,14 @@ def getMangaMetadata(query, anisearchlang, page):
     try:
         totalBookCount = html_dom.xpath("//*[@id=\"information\"]/div/ul/li[2]/ul/li[" + forcedIndex + "]/div[@class=\"releases\"]")[0].itertext()
         totalBookCount = ''.join(totalBookCount).split(": ")[1].split(" / ")[0].replace("+", "")
-        # printC("totalBookCount : "+totalBookCount, 'debug')
+        # printC("[ANISEARCH] : totalBookCount : "+totalBookCount, 'debug')
     except Exception as e:
         try:
             totalBookCount = html_dom.xpath("//*[@id=\"information\"]/div/ul/li[2]/ul/li[1]/div[@class=\"releases\"]")[0].itertext()
             totalBookCount = ''.join(totalBookCount).split(": ")[1].split(" / ")[0].replace("+", "")
         except Exception as e:
             printC(str(e), 'debug')
-            printC("Failed to get totalBookCount", 'error')
+            printC("[ANISEARCH] : Failed to get totalBookCount", 'error')
 
     data.totalBookCount = totalBookCount
 
@@ -194,14 +194,14 @@ def getMangaMetadata(query, anisearchlang, page):
     try:
         totalChaptersCount = html_dom.xpath("//*[@id=\"information\"]/div/ul/li[2]/ul/li[" + forcedIndex + "]/div[@class=\"releases\"]")[0].itertext()
         totalChaptersCount = ''.join(totalChaptersCount).split(": ")[1].split(" / ")[1].replace("+", "")
-        # printC("totalChaptersCount : "+totalChaptersCount, 'debug')
+        # printC("[ANISEARCH] : totalChaptersCount : "+totalChaptersCount, 'debug')
     except Exception as e:
         try:
             totalChaptersCount = html_dom.xpath("//*[@id=\"information\"]/div/ul/li[2]/ul/li[1]/div[@class=\"releases\"]")[0].itertext()
             totalChaptersCount = ''.join(totalChaptersCount).split(": ")[1].split(" / ")[1].replace("+", "")
         except Exception as e:
             printC(str(e), 'debug')
-            printC("Failed to get totalChaptersCount", 'error')
+            printC("[ANISEARCH] : Failed to get totalChaptersCount", 'error')
 
     data.totalChaptersCount = totalChaptersCount
 
@@ -228,7 +228,7 @@ def getMangaMetadata(query, anisearchlang, page):
                 sumlang = ''.join(sumlang)
                 for s in noSummaryLang:
                     if (s in summary):
-                        printC("No summary available for this language")
+                        printC("[ANISEARCH] : No summary available for this language")
                         noavail = True
                         continue
                 if (sumlang == getFlagLanguage(anisearchlang) and noavail == False):
@@ -279,7 +279,7 @@ def getMangaMetadata(query, anisearchlang, page):
             publisher = ''.join(publisher)
         except Exception as e:
             printC(str(e), 'debug')
-            printC("Failed to get publisher", 'error')
+            printC("[ANISEARCH] : Failed to get publisher", 'error')
     if(publisher != ""):
         publisher = publisher.split(": ")[1]
         data.publisher = publisher
