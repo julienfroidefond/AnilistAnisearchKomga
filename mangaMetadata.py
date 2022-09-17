@@ -54,7 +54,7 @@ page = browser.new_page()
 page.goto(getBaseURL(anisearchlang))
 
 seriesnum = 0
-for series in json_string['content']:
+for series in json_string['content'][::-1]:
     seriesID = series['id']
     name = series['metadata']['title']
     if isInLib(libraries, series, json_lib) is True:

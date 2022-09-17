@@ -11,7 +11,7 @@ def anilistGet(currentSerie, forceUpdateFull):
             query = '''
             query ($search: String) {
                 Page {
-                    media (search: $search, type: MANGA, format: MANGA, , genre_not_in: "Hentai") {
+                    media (search: $search, type: MANGA, genre_not_in: "Hentai") {
                         id
                         title {
                             romaji
