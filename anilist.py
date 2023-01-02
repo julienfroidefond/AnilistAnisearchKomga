@@ -100,7 +100,29 @@ def getUserCurrentLists(username):
     query = '''
     query ($userName: String) {
         Page {
-            mediaList(userName: $userName, type: MANGA) {
+            mediaList(userName: $userName, type: MANGA, status_not_in: CURRENT) {
+                mediaId
+                status
+                progressVolumes
+                progress
+            }
+        }
+    }
+    '''
+    variables = {
+        'userName': username
+    }
+    url = 'https://graphql.anilist.co'
+    printC("[ANILIST] : Getting user's lists from anilist for " + username)
+    response = requests.post(url, json={'query': query, 'variables': variables})
+    resData = json.loads(response.text)
+    return resData['data']['Page']['mediaList']
+
+def getUserCurrentCLists(username):
+    query = '''
+    query ($userName: String) {
+        Page {
+            mediaList(userName: $userName, type: MANGA, status: CURRENT) {
                 mediaId
                 status
                 progressVolumes
@@ -134,10 +156,10 @@ def anilistAdd(userMediaList, accessToken, currentSerie):
             if(userMedia['mediaId'] == anilistId):
                 currentUserMedia = userMedia
         
-        status="PLANNING"
+        status="PAUSED"
         if booksReadCount == 0 or totalBookCount is None:
-            status="PLANNING"
-        elif booksReadCount == totalBookCount:
+            status="PAUSED"
+        elif booksReadCount >= totalBookCount:
             status="COMPLETED"
         elif booksReadCount > 0:
             status="CURRENT"
@@ -153,11 +175,11 @@ def anilistAdd(userMediaList, accessToken, currentSerie):
 
         hasToUpdate = True
         if(currentUserMedia):
-            if(currentUserMedia['status'] != "PLANNING" and currentUserMedia['status'] != "COMPLETED" and currentUserMedia['status'] != "CURRENT") :
+            if(currentUserMedia['status'] != "PLANNING" and currentUserMedia['status'] != "COMPLETED" and currentUserMedia['status'] != "CURRENT" and currentUserMedia['status'] != "PAUSED") :
                 printC("[ANILIST] : Not updating anilist : preserving status : " + currentUserMedia['status'])
                 logStatus(currentSerie, "anilist push", "Not updating anilist : preserving status : " + currentUserMedia['status'], True)
                 hasToUpdate = False
-            if(currentUserMedia['status'] == status and booksReadCount <= currentUserMedia['progressVolumes'] and progressChapters <= currentUserMedia['progress']):
+            if(booksReadCount < currentUserMedia['progressVolumes'] or progressChapters < currentUserMedia['progress']):
                 printC("[ANILIST] : Not updating anilist : preserving volumes count : " + str(currentUserMedia['progressVolumes']) + " VS LOCAL : " +str(booksReadCount))
                 logStatus(currentSerie, "anilist push", "Not updating anilist : preserving volumes count : " + str(currentUserMedia['progress']) + "/" + str(currentUserMedia['progressVolumes']) + " VS LOCAL : " + str(progressChapters) + "/" +str(booksReadCount), True)
                 hasToUpdate = False

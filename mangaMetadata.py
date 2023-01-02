@@ -43,6 +43,7 @@ if activateAnilistSync and anilistUsername != "":
     accessToken = aniListConnect(datas.get("anilistAccessToken", ""), anilistClientId, anilistSecret)
     datas["anilistAccessToken"] = accessToken
     userMediaList = getUserCurrentLists(anilistUsername)
+    userMediaList = userMediaList + getUserCurrentCLists(anilistUsername)
 
 forceUpdateFull = False
 
